@@ -1,0 +1,28 @@
+{
+  "name": "ocn-bridge",
+  "version": "0.1.0",
+  "description": "CPO Bridge for the Open Charging Network configurable for any proprietary API",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run lint && tsc",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "test": "npm run lint && mocha -r ts-node/register 'test/**/*.spec.ts'"
+  },
+  "author": "eMobilify GmbH",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.7.5",
+    "@types/node-fetch": "^2.5.1",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {
+    "fastify": "^2.8.0",
+    "node-fetch": "^2.6.0"
+  }
+}
