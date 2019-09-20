@@ -1,23 +1,43 @@
-import fastify from "fastify"
+import * as bodyParser from "body-parser"
+import express from "express"
+import {  Router } from "express"
+import { Server } from "http"
+import morgan from "morgan"
 
-const home = (fastifyInstance: fastify.FastifyInstance, _: object, done: (err?: fastify.FastifyError) => void) => {
-    fastifyInstance.get("/", async () => {
-        return "OCN Bridge v0.1.0"
+// import controllers
+import { versionsController } from "./ocpi/v2_2/versions.controller"
+
+// set basic home route
+const homeController = Router()
+homeController.get("/", async (_, res) => {
+    res.send("OCN Bridge v0.1.0")
+})
+
+// bootstrap function
+export const startServer = async (logger: boolean = true): Promise<Server> => {
+
+    const app = express()
+    app.use(bodyParser.urlencoded({extended: true}))
+    app.use(bodyParser.json())
+    app.use(homeController)
+    app.use("/ocpi/versions", versionsController)
+
+    if (logger) {
+        app.use(morgan("dev"))
+    }
+
+    return new Promise((resolve, reject) => {
+        const server = app.listen(3000, (err?: Error) => {
+            err ? reject(err) : resolve(server)
+        })
     })
-    done()
 }
 
-export const startServer = async (): Promise<fastify.FastifyInstance> => {
-    const app = fastify({
-        // logger: { level: "info" },
-        ignoreTrailingSlash: true,
-        // trustProxy: true // tells fastify that it is sitting behind proxy and accepts X-Forwarded-* headers
+// stop server cleanly
+export const stopServer = async (app: Server) => {
+    return new Promise((resolve, reject) => {
+        app.close((err?: Error) => {
+            err ? reject(err) : resolve()
+        })
     })
-    app.register(home)
-    await app.listen(3000)
-    return app
-}
-
-export const stopServer = async (app: fastify.FastifyInstance) => {
-    await app.close()
 }

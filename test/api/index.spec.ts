@@ -1,15 +1,15 @@
 import { assert } from "chai"
-import fastify from "fastify"
+import { Server } from "http"
 import "mocha"
 import fetch from "node-fetch"
 import { startServer, stopServer } from "../../src/api/index"
 
 describe("API context", () => {
 
-    let app: fastify.FastifyInstance
+    let app: Server
 
     beforeEach(async () => {
-        app = await startServer()
+        app = await startServer(false)
     })
 
     afterEach(async () => {
