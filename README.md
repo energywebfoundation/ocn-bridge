@@ -17,9 +17,23 @@ Then can be included in a project:
 ```ts
 import { startServer } from "ocn-bridge"
 
-startServer({ /* configuration values including API plugin to use*/})
-    .then(/* continue */)
-    .catch(/* handle error */)
+startServer({ /* configuration values including API plugin to use*/
+    logger: true,
+    pluggableAPI: new PluggableAPI()
+}).then((server: http.Server) => {
+    /* continue */
+}).catch((err: Error) => {
+    /* handle error */
+})
 ```
 
 The API plugin interface is still to be defined.
+
+
+## TODO:
+
+- Check if already registered on start
+- Register new party on start (registry smart contract and OCN client connection) if not already
+- Authorization middleware (token B)
+- Include token A/C in headers in requests sent to OCN client (e.g. async commands result)
+- Finish commands receiver interface

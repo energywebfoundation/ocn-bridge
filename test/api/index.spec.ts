@@ -3,13 +3,17 @@ import { Server } from "http"
 import "mocha"
 import fetch from "node-fetch"
 import { startServer, stopServer } from "../../src/api/index"
+import { PluggableAPIStub } from "../stubs/pluggableAPI.stub"
 
 describe("API context", () => {
 
     let app: Server
 
     beforeEach(async () => {
-        app = await startServer(false)
+        app = await startServer({
+            logger: false,
+            pluggableAPI: new PluggableAPIStub()
+        })
     })
 
     afterEach(async () => {

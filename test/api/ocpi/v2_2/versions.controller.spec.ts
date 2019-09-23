@@ -1,15 +1,18 @@
-// import { assert } from "chai"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
 import {startServer, stopServer} from "../../../../src/api/index"
+import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 
 describe("OCPI Versions Controller", () => {
 
     let app: Server
 
     beforeEach(async () => {
-        app = await startServer()
+        app = await startServer({
+            logger: false,
+            pluggableAPI: new PluggableAPIStub()
+        })
     })
 
     afterEach(async () => {
