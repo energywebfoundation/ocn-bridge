@@ -31,5 +31,5 @@ export interface ICommandResult {
 
 export interface IAsyncCommand {
     commandResponse: ICommandResponse
-    commandResult: () => Promise<ICommandResult>
+    commandResult?: () => Promise<ICommandResult>
 }

@@ -12,28 +12,106 @@ The bridge can be used in the following way (make sure you have permissions to r
 npm install git+ssh://git@bitbucket.org:shareandcharge/ocn-bridge.git
 ```
 
-Then can be included in a project:
+Then can be included in a project in several ways:
+
+In TypeScript, the `startBridge` bootstrap function can be imported directly (or alternatively with `*` syntax):
 
 ```ts
-import { startServer } from "ocn-bridge"
+import { startBridge, stopBridge } from "ocn-bridge"
+```
 
-startServer({ /* configuration values including API plugin to use*/
-    logger: true,
-    pluggableAPI: new PluggableAPI()
-}).then((server: http.Server) => {
+Using JavaScript, the module can be imported as follows:
+
+```js
+const ocnBridge = require("ocn-bridge")
+```
+
+To start the bridge, call the `startBridge` function with a configuration object that implements `IBridgeConfigurationOptions`:
+
+```ts
+startBridge({
+
+    // publicly avialable URL of the Bridge 
+    // note the bridge binds to localhost; use a reverse proxy like Nginx with SSL
+    publicBridgeURL: "http://bridge.cpo.net",
+
+    // publicly available URL of the OCN client to connect to                               
+    ocnClientURL: "http://client.ocn.net",          
+    
+    // set the bridge to use OCPI credentials roles
+    roles: [                                  
+        {
+            role: "CPO",
+            business_details: {
+                name: "Super CPO Ltd."
+            },
+            country_code: "GB",
+            party_id: "SUP"
+        }
+    ],
+    
+    // EMSP or CPO Backoffice API plug-in to use; must implement IPluggableAPI
+    pluggableAPI: new PluggableAPI(),          
+    
+    // Interface providing getting/setting of important OCPI variables (token auth, endpoints, etc.)
+    // must implmenet IPluggableDB
+    pluggableDB: new PluggableDB(),
+    
+    // Interface providing writing/reading from an OCN Registry
+    // must implement IPluggableRegistry (a DefaultRegistry class is provided in this case)
+    pluggableRegistry: new DefaultRegistry("http://localhost:8545", "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10")      
+
+    // [optional, default=false] set to true for morgan to log to stdout
+    logger: true,        
+    
+    // [optional, default=3000] set the internal port to listen on
+    port: 3001,      
+    
+    // [optional, default=false] start the bridge without trying to register
+    dryRun: true
+
+}).then((bridge: http.Server) => {
+
     /* continue */
+
 }).catch((err: Error) => {
-    /* handle error */
+
+/* handle error */
+
 })
 ```
 
-The API plugin interface is still to be defined.
+A bridge can then be cleanly stopped using the `stopBridge` function:
 
+```ts
+await stopBridge(bridge)
+```
 
-## TODO:
+### Registering an OCPI Party
 
-- Check if already registered on start
-- Register new party on start (registry smart contract and OCN client connection) if not already
-- Authorization middleware (token B)
-- Include token A/C in headers in requests sent to OCN client (e.g. async commands result)
-- Finish commands receiver interface
+The registration process is two-fold and will be triggered automatically as long as the configuration option
+`dryRun` is not set to `true`. Parties are taken from the `roles` attribute used in starting the bridge. 
+
+Firstly, the OCN Bridge will check the status of the OCPI party in the OCN Registry. If they are unlisted, or 
+they are listed under a different OCN client as the one provided in the configuration, the OCN Bridge will
+attempt to register them. To do this, it is necessary to at least set the environment variable, `SIGNER_KEY`, 
+describing the private key to use as the signer. If the signer is to be different from the _spender_ (the 
+wallet paying for the transaction), then it is possible to also set a `SPENDER_KEY`, otherwise the two will 
+be the same. For example:
+
+Secondly, the OCN Bridge will check whether there is already a connection to an OCN client. If not, a POST
+`credentials` request will be sent to the desired OCN client. To do this, another environment variable is
+needed. The `TOKEN_A` environment variable is obtained from the OCN client and is needed to complete the
+OCPI connection with it. Ask the administrator of the OCN client for it if this is missing.
+
+In full, a project that depends on the OCN Bridge can therefore be started like so:
+
+```
+SIGNER_KEY=0xacbe153d15380ed52f7fab357dae7f7398bf099fcf8e79d06f758aa245b5ea64 TOKEN_A=e8b658a4-f2f9-47b6-b17e-3c672042a231 node /path/to/project.js
+```
+
+On second run, these values are no longer necessary:
+
+```
+node /path/to/project.js
+```

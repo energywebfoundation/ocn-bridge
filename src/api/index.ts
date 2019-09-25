@@ -1,14 +1,13 @@
 import * as bodyParser from "body-parser"
-import express from "express"
-import {  Router } from "express"
+import express, { Router } from "express"
 import { Server } from "http"
 import morgan from "morgan"
-
 import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
-
+import { RegistrationService } from "../services/registration.service"
+import { stripVersions } from "../tools/tools"
 // import controllers
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
-import { versionsController } from "./ocpi/v2_2/versions.controller"
+import { VersionsController } from "./ocpi/v2_2/versions.controller"
 
 // set basic home route
 const homeController = Router()
@@ -17,7 +16,7 @@ homeController.get("/", async (_, res) => {
 })
 
 /**
- * Bootstrap a new OCN Bridge server with OCPI interface
+ * Bootstrap a new OCN Bridge server with OCPI interface. Will attempt to register on start.
  * @param options an object of configuration options
  *      - logger {boolean} - sets whether to log to stdout using morgan
  *      - pluggableAPI {IPluggableAPI} - a class to handle incoming OCPI requests
@@ -25,38 +24,30 @@ homeController.get("/", async (_, res) => {
  */
 export const startServer = async (options: IBridgeConfigurationOptions): Promise<Server> => {
 
-    /**
-     * startServer should take options object. Possible values:
-     *      - Public IP of the bridge
-     *      - Credentials of bridge/party
-     *      - OCN client credentials: public IP/token_A? OR the admin key?
-     *      - API class which implements PluggableAPI interface
-     *      - Registry class which implements Registry interface
-     *      - Enum value describing OCPI interface(s) to use
-     *              - Enum: SENDER, RECEIVER, BOTH
-     *      - Array of OCPI modules to implement (could be in pluggable API)
-     *      - Logger (boolean)
-     *
-     * Check registration status on start. Ensure that:
-     *      - Party is registered on network
-     *      - Party is connected to OCN client
-     *
-     *      - if not, register/connect automatically
-     */
-
     const app = express()
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
     app.use(homeController)
-    app.use("/ocpi/versions", versionsController)
-    app.use("/ocpi/receiver/2.2/commands", CommandsController.getRoutes(options.pluggableAPI))
+    app.use("/ocpi/versions", VersionsController.getRoutes(options.publicBridgeURL, options.pluggableDB))
+    app.use("/ocpi/receiver/2.2/commands", CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB))
 
     if (options.logger) {
         app.use(morgan("dev"))
     }
 
-    return new Promise((resolve, reject) => {
-        const server = app.listen(3000, (err?: Error) => {
+    return new Promise(async (resolve, reject) => {
+        const server = app.listen(options.port || 3000, async (err?: Error) => {
+
+            if (!options.dryRun) {
+                const registrationService = new RegistrationService(options.pluggableRegistry, options.pluggableDB)
+
+                await registrationService.register(
+                    options.publicBridgeURL,
+                    stripVersions(options.ocnClientURL),
+                    options.roles
+                )
+            }
+
             err ? reject(err) : resolve(server)
         })
     })

@@ -3,7 +3,10 @@ import { Server } from "http"
 import "mocha"
 import fetch from "node-fetch"
 import { startServer, stopServer } from "../../src/api/index"
+import { testRoles } from "../data/test-data"
 import { PluggableAPIStub } from "../stubs/pluggableAPI.stub"
+import { PluggableDBStub } from "../stubs/pluggableDB.stub"
+import { PluggableRegistryStub } from "../stubs/pluggableRegistry.stub"
 
 describe("API context", () => {
 
@@ -11,8 +14,13 @@ describe("API context", () => {
 
     beforeEach(async () => {
         app = await startServer({
-            logger: false,
-            pluggableAPI: new PluggableAPIStub()
+            publicBridgeURL: "http://localhost:3000",
+            ocnClientURL: "http://localhost:3001",
+            roles: testRoles,
+            pluggableAPI: new PluggableAPIStub(),
+            pluggableDB: new PluggableDBStub(),
+            pluggableRegistry: new PluggableRegistryStub(),
+            dryRun: true
         })
     })
 

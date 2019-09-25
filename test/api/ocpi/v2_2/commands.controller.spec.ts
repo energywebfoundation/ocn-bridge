@@ -1,87 +1,182 @@
-import bodyParser from "body-parser"
 import { assert } from "chai"
 import { EventEmitter } from "events"
-import express from "express"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
+
 import {startServer, stopServer} from "../../../../src/api/index"
+import { testToken, testRoles } from "../../../data/test-data"
+import { startOCNClient } from "../../../mock/ocn-client"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
+import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
+import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
 
 describe("OCPI Commands Controller", () => {
 
+    let events: EventEmitter
+
     let app: Server
 
+    let ocnClient: Server
+
     beforeEach(async () => {
+        const db = new PluggableDBStub()
+        db.setTokenB("token-b")
+        db.setTokenC("token-c")
+
+        events = new EventEmitter()
+
         app = await startServer({
-            logger: false,
-            pluggableAPI: new PluggableAPIStub()
+            publicBridgeURL: "http://localhost:3000",
+            ocnClientURL: "http://localhost:3001",
+            roles: testRoles,
+            pluggableAPI: new PluggableAPIStub(),
+            pluggableDB: db,
+            pluggableRegistry: new PluggableRegistryStub(),
+            dryRun: true
         })
+
+        ocnClient = await startOCNClient(3001, events)
     })
 
     afterEach(async () => {
         await stopServer(app)
+        await stopServer(ocnClient)
     })
 
     context("Receiver interface", () => {
 
         it("should return CommandResponse and send async CommandResult on START_SESSION", (done) => {
 
-            const asyncResult = new EventEmitter()
+            request(app)
+                .post("/ocpi/receiver/2.2/commands/START_SESSION")
+                .set("Authorization", "Token token-b")
+                .send({
+                    response_url: "http://localhost:3001/commands/START_SESSION/5",
+                    token: testToken,
+                    location_id: "LOC1"
+                })
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
 
-            // need to mock the OCN client to ensure that the async CommandResult is correctly sent after
-            // the initial CommandResponse
-            const mockOCNClient = express()
-            mockOCNClient.use(bodyParser.json())
+                    assert.equal(result.body.status_code, 1000)
+                    assert.equal(result.body.data.result, "ACCEPTED")
+                    assert.equal(result.body.data.timeout, 10)
 
-            mockOCNClient.post("/response/5", async (req, res) => {
-                try {
-                    assert.equal(req.body.result, "ACCEPTED")
-                    asyncResult.emit("complete", true)
-                    res.send({
-                        status_code: 1000,
-                        timestamp: new Date()
+                    events.once("START_SESSION", (commandResult) => {
+                        assert.equal(commandResult.result, "ACCEPTED")
+                        done()
                     })
-                } catch (err) {
-                    res.end()
-                    mockOCNCLientServer.close(() => done(err))
-                }
 
-            })
-
-            const mockOCNCLientServer = mockOCNClient.listen(3001, () => {
-
-                request(app)
-                    .post("/ocpi/receiver/2.2/commands/START_SESSION")
-                    .send({
-                        response_url: "http://localhost:3001/response/5",
-                        token: {
-                            country_code: "DE",
-                            party_id: "MSP",
-                            uid: "0102030405",
-                            type: "AD_HOC_USER",
-                            contract_id: "DE-123-XX",
-                            issuer: "test MSP",
-                            valid: true,
-                            whitelist: "ALWAYS",
-                            last_updated: new Date()
-                        },
-                        location_id: "LOC1"
-                    })
-                    .expect(200)
-                    .end((err, result) => {
-                        if (err) {
-                            return done(err)
-                        }
-                        assert.equal(result.body.result, "ACCEPTED")
-                        assert.equal(result.body.timeout, 10)
-
-                        asyncResult.once("complete", () => {
-                            mockOCNCLientServer.close(done)
-                        })
-                    })
-            })
+                    events.once("error", done)
+                })
         })
+
+        it("should return CommandResponse and send async CommandResult on STOP_SESSION", (done) => {
+
+            request(app)
+                .post("/ocpi/receiver/2.2/commands/STOP_SESSION")
+                .set("Authorization", "Token token-b")
+                .send({
+                    response_url: "http://localhost:3001/commands/STOP_SESSION/6",
+                    session_id: "0102030400506"
+                })
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+
+                    assert.equal(result.body.status_code, 1000)
+                    assert.equal(result.body.data.result, "ACCEPTED")
+                    assert.equal(result.body.data.timeout, 10)
+
+                    events.once("STOP_SESSION", (commandResult) => {
+                        assert.equal(commandResult.result, "ACCEPTED")
+                        done()
+                    })
+
+                    events.once("error", done)
+                })
+        })
+
+        it("should return NOT_SUPPORTED on CANCEL_RESERVATION", (done) => {
+
+            request(app)
+                .post("/ocpi/receiver/2.2/commands/CANCEL_RESERVATION")
+                .set("Authorization", "Token token-b")
+                .send({
+                    response_url: "http://localhost:3001/commands/CANCEL_RESERVATION/7",
+                    session_id: "0102030400506"
+                })
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+
+                    assert.equal(result.body.status_code, 1000)
+                    assert.equal(result.body.data.result, "NOT_SUPPORTED")
+                    assert.equal(result.body.data.timeout, 0)
+                    assert.isString(result.body.timestamp)
+                    done()
+                })
+
+        })
+
+        it("should return NOT_SUPPORTED on RESERVE_NOW", (done) => {
+
+            request(app)
+                .post("/ocpi/receiver/2.2/commands/RESERVE_NOW")
+                .set("Authorization", "Token token-b")
+                .send({
+                    response_url: "http://localhost:3001/commands/RESERVE_NOW/8",
+                    token: testToken,
+                    expiry_date: new Date(),
+                    location_id: "LOC1",
+                    evse_uid: "1234"
+                })
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+
+                    assert.equal(result.body.status_code, 1000)
+                    assert.equal(result.body.data.result, "NOT_SUPPORTED")
+                    assert.equal(result.body.data.timeout, 0)
+                    assert.isString(result.body.timestamp)
+                    done()
+                })
+        })
+
+        it("should return NOT_SUPPORTED on UNLOCK_CONNECTOR", (done) => {
+
+            request(app)
+                .post("/ocpi/receiver/2.2/commands/UNLOCK_CONNECTOR")
+                .set("Authorization", "Token token-b")
+                .send({
+                    response_url: "http://localhost:3001/commands/UNLOCK_CONNECTOR/9",
+                    location_id: "LOC1",
+                    evse_uid: "1234"
+                })
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+
+                    assert.equal(result.body.status_code, 1000)
+                    assert.equal(result.body.data.result, "NOT_SUPPORTED")
+                    assert.equal(result.body.data.timeout, 0)
+                    assert.isString(result.body.timestamp)
+                    done()
+                })
+        })
+
     })
 
 })
