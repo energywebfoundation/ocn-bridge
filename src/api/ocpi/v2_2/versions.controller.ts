@@ -17,24 +17,27 @@ export class VersionsController {
         }
 
         router.get("/", isAuthorized, async (_, res) => {
-            res.send({
+            res.send(OcpiResponse.withData(1000, {
                 versions: [
                     {
                         version: "2.2",
-                        // TODO: configurable public IP
                         url: url.resolve(publicIP, "/ocpi/versions/2.2")
                     }
                 ]
-            })
+            }))
         })
 
         router.get("/2.2", isAuthorized, async (_, res) => {
-            res.send({
+            res.send(OcpiResponse.withData(1000, {
                 version: "2.2",
                 endpoints: [
-                    // TODO: add implemented endpoints
+                    {
+                        identifier: "commands",
+                        role: "RECEIVER",
+                        url: url.resolve(publicIP, "/ocpi/receiver/2.2/commands")
+                    }
                 ]
-            })
+            }))
         })
         return router
     }

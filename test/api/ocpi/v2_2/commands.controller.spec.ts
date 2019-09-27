@@ -1,11 +1,11 @@
 import { assert } from "chai"
 import { EventEmitter } from "events"
+import { Request } from "express"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
-
-import {startServer, stopServer} from "../../../../src/api/index"
-import { testToken, testRoles } from "../../../data/test-data"
+import { startServer, stopServer } from "../../../../src/api/index"
+import { testRoles, testToken } from "../../../data/test-data"
 import { startOCNClient } from "../../../mock/ocn-client"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
@@ -51,6 +51,12 @@ describe("OCPI Commands Controller", () => {
             request(app)
                 .post("/ocpi/receiver/2.2/commands/START_SESSION")
                 .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
                 .send({
                     response_url: "http://localhost:3001/commands/START_SESSION/5",
                     token: testToken,
@@ -66,8 +72,17 @@ describe("OCPI Commands Controller", () => {
                     assert.equal(result.body.data.result, "ACCEPTED")
                     assert.equal(result.body.data.timeout, 10)
 
-                    events.once("START_SESSION", (commandResult) => {
-                        assert.equal(commandResult.result, "ACCEPTED")
+                    events.once("START_SESSION", (req: Request) => {
+
+                        assert.isString(req.headers["x-request-id"])
+                        assert.isString(req.headers["x-correlation-id"])
+
+                        assert.equal(req.headers["ocpi-from-country-code"], "DE")
+                        assert.equal(req.headers["ocpi-from-party-id"], "CPO")
+                        assert.equal(req.headers["ocpi-to-country-code"], "DE")
+                        assert.equal(req.headers["ocpi-to-party-id"], "MSP")
+
+                        assert.equal(req.body.result, "ACCEPTED")
                         done()
                     })
 
@@ -80,6 +95,12 @@ describe("OCPI Commands Controller", () => {
             request(app)
                 .post("/ocpi/receiver/2.2/commands/STOP_SESSION")
                 .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
                 .send({
                     response_url: "http://localhost:3001/commands/STOP_SESSION/6",
                     session_id: "0102030400506"
@@ -94,8 +115,18 @@ describe("OCPI Commands Controller", () => {
                     assert.equal(result.body.data.result, "ACCEPTED")
                     assert.equal(result.body.data.timeout, 10)
 
-                    events.once("STOP_SESSION", (commandResult) => {
-                        assert.equal(commandResult.result, "ACCEPTED")
+                    events.once("STOP_SESSION", (req: Request) => {
+
+                        assert.isString(req.headers["x-request-id"])
+                        assert.isString(req.headers["x-correlation-id"])
+
+                        assert.equal(req.headers["ocpi-from-country-code"], "DE")
+                        assert.equal(req.headers["ocpi-from-party-id"], "CPO")
+                        assert.equal(req.headers["ocpi-to-country-code"], "DE")
+                        assert.equal(req.headers["ocpi-to-party-id"], "MSP")
+
+                        assert.equal(req.body.result, "ACCEPTED")
+
                         done()
                     })
 

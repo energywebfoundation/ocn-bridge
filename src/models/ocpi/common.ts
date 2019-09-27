@@ -1,3 +1,12 @@
+export interface IHeaders {
+    "X-Request-ID": string
+    "X-Correlation-ID": string
+    "OCPI-From-Country-Code": string
+    "OCPI-From-Party-Id": string
+    "OCPI-To-Country-Code": string
+    "OCPI-To-Party-Id": string
+}
+
 export interface IResponse<T> {
     status_code: number
     status_message?: string

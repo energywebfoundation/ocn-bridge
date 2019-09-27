@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response, Router } from "express"
+import { IncomingHttpHeaders } from "http"
 import fetch from "node-fetch"
 import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/commands"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
+import { PushService } from "../../../services/push.service"
+import { setResponseHeaders } from "../../../tools/tools"
 
 /**
  * OCPI 2.2 commands module controller
@@ -14,7 +17,7 @@ export class CommandsController {
      * Establish routes for the commands controller
      * @param pluggableAPI inject a pluggable API object to use in request handling
      */
-    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB): Router {
+    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB, pushService: PushService): Router {
         const router = Router()
 
         /**
@@ -37,42 +40,38 @@ export class CommandsController {
             // send the initial response
             res.send(OcpiResponse.withData(1000, response.commandResponse))
             // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, response, pluggableDB)
+            await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
         })
 
         /**
          * OCPI command: RESERVE_NOW
          */
         router.post("/RESERVE_NOW", isAuthorized, async (req, res) => {
+            // separate response_url from rest of body
+            const { responseURL, out: reserveRequest } = this.extractResponseURL(req.body)
             // await initial response to reserve location/evse/connector
-            const response = await pluggableAPI.commands.reserveNow(
-                req.body.token,
-                req.body.expiry_date,
-                req.body.location_id,
-                req.body.evse_uid,
-                req.body.connector_id
-            )
+            const response = await pluggableAPI.commands.reserveNow(reserveRequest)
             // send initial response
             res.send(OcpiResponse.withData(1000, response.commandResponse))
             // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, response, pluggableDB)
+            await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
         })
 
         /**
          * OCPI command: START_SESSION
          */
         router.post("/START_SESSION", isAuthorized, async (req, res) => {
-            // await the initial response to start a session
-            const response = await pluggableAPI.commands.startSession(
-                req.body.token,
-                req.body.location_id,
-                req.body.evse_uid,
-                req.body.connector_id
-            )
+            // separate response_url from rest of body
+            const { responseURL, out: startRequest } = this.extractResponseURL(req.body)
+            // prepare push functions
+            const sendSessionFunc = pushService.prepareSessionUpdate(req.headers)
+            const sendCdrFunc = pushService.prepareCDR(req.headers)
+            // await initial response from CPO
+            const response = await pluggableAPI.commands.startSession(startRequest, sendSessionFunc, sendCdrFunc)
             // send the initial response
             res.send(OcpiResponse.withData(1000, response.commandResponse))
             // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, response, pluggableDB)
+            await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
         })
 
         /**
@@ -84,7 +83,7 @@ export class CommandsController {
             // send the inital response
             res.send(OcpiResponse.withData(1000, response.commandResponse))
             // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, response, pluggableDB)
+            await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
         })
 
         /**
@@ -100,10 +99,24 @@ export class CommandsController {
             // send the initial response
             res.send(OcpiResponse.withData(1000, response.commandResponse))
             // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, response, pluggableDB)
+            await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
         })
 
         return router
+    }
+
+    /**
+     * Extract the response_url from a request body
+     * @param body OCPI request body (i.e. StartSession, ReserveNow)
+     * @returns the separated response_url and body
+     */
+    private static extractResponseURL(body: any): { responseURL: string, out: any} {
+        const responseURL = body.response_url
+        delete body.response_url
+        return {
+            responseURL,
+            out: body
+        }
     }
 
     /**
@@ -120,7 +133,7 @@ export class CommandsController {
      * @param responseURL the response_url contained in the initial command request
      * @param response the full IAsyncResult object containing CommandResponse and CommandResult
      */
-    private static async sendAsyncResult(responseURL: string, response: IAsyncCommand, pluggableDB: IPluggableDB) {
+    private static async sendAsyncResult(responseURL: string, reqHeaders: IncomingHttpHeaders, response: IAsyncCommand, pluggableDB: IPluggableDB) {
         if (this.responseWasAccepted(response) && response.commandResult) {
             // await the async response
             const asyncResult = await response.commandResult()
@@ -129,10 +142,10 @@ export class CommandsController {
             // fire and forget request
             await fetch(responseURL, {
                 method: "POST",
-                headers: {
+                headers: Object.assign({
                     "Authorization": `Token ${tokenC}`,
-                    "Content-Type": "application/json"
-                },
+                    "Content-Type": "application/json",
+                }, setResponseHeaders(reqHeaders)),
                 body: JSON.stringify(asyncResult)
             })
         }

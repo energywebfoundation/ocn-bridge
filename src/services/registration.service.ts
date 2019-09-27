@@ -1,3 +1,4 @@
+import { utils } from "ethers"
 import fetch from "node-fetch";
 import * as url from "url";
 import * as uuid from "uuid";
@@ -20,11 +21,11 @@ export class RegistrationService {
                 case registryListing.OK:
                     break
                 case registryListing.REGISTER_REQUIRED:
-                    const regKeys = this.getKeys()
+                    const regKeys = this.getKeys("register")
                     await this.listInRegistry(role.country_code, role.party_id, clientInfo.url, clientInfo.address, regKeys.signer, regKeys.spender)
                     break
                 case registryListing.UPDATE_REQUIRED:
-                    const updateKeys = this.getKeys()
+                    const updateKeys = this.getKeys("update")
                     await this.updateInRegistry(role.country_code, role.party_id, clientInfo.url, clientInfo.address, updateKeys.signer, updateKeys.spender)
                     break
             }
@@ -53,7 +54,7 @@ export class RegistrationService {
         const clientURL = await this.registry.getClientURL(countryCode, partyID)
         const clientAddress = await this.registry.getClientAddress(countryCode, partyID)
 
-        if ((clientURL === expectedClientInfo.url) && (clientAddress === expectedClientInfo.address)) {
+        if ((clientURL === expectedClientInfo.url) && (utils.getAddress(clientAddress) === utils.getAddress(expectedClientInfo.address))) {
             return registryListing.OK
         } else if ((clientURL === "") && (clientAddress === "0x0000000000000000000000000000000000000000")) {
             return registryListing.REGISTER_REQUIRED
@@ -125,12 +126,12 @@ export class RegistrationService {
         await this.db.setTokenC(clientCredentials.data.token)
     }
 
-    private getKeys(): { signer: string, spender: string } {
+    private getKeys(mode: string): { signer: string, spender: string } {
         let signer: string
         let spender: string
 
         if (!process.env.SIGNER_KEY) {
-            throw Error("No SIGNER_KEY provided. Unable to create listing in OCN Registry")
+            throw Error(`No SIGNER_KEY provided. Unable to ${mode} listing in OCN Registry`)
         }
         signer = process.env.SIGNER_KEY
 

@@ -1,3 +1,4 @@
+import { assert } from "chai"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
@@ -35,24 +36,50 @@ describe("OCPI Versions Controller", () => {
         request(app)
             .get("/ocpi/versions")
             .set("Authorization", "Token token-b")
-            .expect(200, {
-                versions: [
-                    {
-                        version: "2.2",
-                        url: "http://localhost:3000/ocpi/versions/2.2"
-                    }
-                ]
-            }, done)
+            .expect(200)
+            .end((err, result) => {
+                if (err) {
+                    done(err)
+                }
+
+                assert.equal(result.body.status_code, 1000)
+                assert.deepEqual(result.body.data, {
+                    versions: [
+                        {
+                            version: "2.2",
+                            url: "http://localhost:3000/ocpi/versions/2.2"
+                        }
+                    ]
+                })
+
+                done()
+            })
     })
 
     it("should return 2.2 endpoints", (done) => {
         request(app)
             .get("/ocpi/versions/2.2")
             .set("Authorization", "Token token-b")
-            .expect(200, {
-                version: "2.2",
-                endpoints: []
-            }, done)
+            .expect(200)
+            .end((err, result) => {
+                if (err) {
+                    done(err)
+                }
+
+                assert.equal(result.body.status_code, 1000)
+                assert.deepEqual(result.body.data, {
+                    version: "2.2",
+                    endpoints: [
+                        {
+                            identifier: "commands",
+                            role: "RECEIVER",
+                            url: "http://localhost:3000/ocpi/receiver/2.2/commands"
+                        }
+                    ]
+                })
+
+                done()
+            })
     })
 
 })

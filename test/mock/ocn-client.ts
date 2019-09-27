@@ -76,12 +76,12 @@ export const startOCNClient = async (port: number, events: EventEmitter = new Ev
     })
 
     mockOCNClient.post("/commands/START_SESSION/5", authorizationMiddleware("token-c"), async (req, res) => {
-        events.emit("START_SESSION", req.body)
+        events.emit("START_SESSION", req)
         res.end()
     })
 
     mockOCNClient.post("/commands/STOP_SESSION/6", authorizationMiddleware("token-c"), async (req, res) => {
-        events.emit("STOP_SESSION", req.body)
+        events.emit("STOP_SESSION", req)
         res.end()
     })
 

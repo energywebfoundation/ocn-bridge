@@ -3,6 +3,7 @@ import express, { Router } from "express"
 import { Server } from "http"
 import morgan from "morgan"
 import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
+import { PushService } from "../services/push.service"
 import { RegistrationService } from "../services/registration.service"
 import { stripVersions } from "../tools/tools"
 // import controllers
@@ -27,13 +28,17 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
     const app = express()
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
-    app.use(homeController)
-    app.use("/ocpi/versions", VersionsController.getRoutes(options.publicBridgeURL, options.pluggableDB))
-    app.use("/ocpi/receiver/2.2/commands", CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB))
 
     if (options.logger) {
         app.use(morgan("dev"))
     }
+
+    app.use(homeController)
+
+    const pushService = new PushService(options.pluggableDB)
+
+    app.use("/ocpi/versions", VersionsController.getRoutes(options.publicBridgeURL, options.pluggableDB))
+    app.use("/ocpi/receiver/2.2/commands", CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, pushService))
 
     return new Promise(async (resolve, reject) => {
         const server = app.listen(options.port || 3000, async (err?: Error) => {

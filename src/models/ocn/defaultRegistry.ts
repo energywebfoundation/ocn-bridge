@@ -56,7 +56,7 @@ export class DefaultRegistry implements IPluggableRegistry {
 
     private async sign(countryCode: string, partyID: string, clientURL: string, clientAddress: string, wallet: ethers.Wallet): Promise<Signature> {
         const msg = `${countryCode}${partyID}${clientURL}${clientAddress}`
-        const msgHash = ethers.utils.keccak256(msg)
+        const msgHash = ethers.utils.keccak256(Buffer.from(msg))
         const msgHashBytes = ethers.utils.arrayify(msgHash)
         const flatSig = await wallet.signMessage(msgHashBytes)
         const sig = ethers.utils.splitSignature(flatSig)
