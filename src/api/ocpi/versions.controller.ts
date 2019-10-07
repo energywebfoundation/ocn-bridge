@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express"
 import * as url from "url"
-import { OcpiResponse } from "../../../models/ocpi/common"
-import { IPluggableDB } from "../../../models/pluggableDB"
+import { OcpiResponse } from "../../models/ocpi/common"
+import { IPluggableDB } from "../../models/pluggableDB"
 
 export class VersionsController {
 
@@ -17,7 +17,7 @@ export class VersionsController {
         }
 
         router.get("/", isAuthorized, async (_, res) => {
-            res.send(OcpiResponse.withData(1000, {
+            res.send(OcpiResponse.withData({
                 versions: [
                     {
                         version: "2.2",
@@ -28,13 +28,19 @@ export class VersionsController {
         })
 
         router.get("/2.2", isAuthorized, async (_, res) => {
-            res.send(OcpiResponse.withData(1000, {
+            // TODO: configurable endpoints
+            res.send(OcpiResponse.withData({
                 version: "2.2",
                 endpoints: [
                     {
                         identifier: "commands",
                         role: "RECEIVER",
                         url: url.resolve(publicIP, "/ocpi/receiver/2.2/commands")
+                    },
+                    {
+                        identifier: "locations",
+                        role: "SENDER",
+                        url: url.resolve(publicIP, "/ocpi/sender/2.2/locations")
                     }
                 ]
             }))

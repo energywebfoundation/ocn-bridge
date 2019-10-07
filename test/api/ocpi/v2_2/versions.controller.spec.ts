@@ -74,6 +74,11 @@ describe("OCPI Versions Controller", () => {
                             identifier: "commands",
                             role: "RECEIVER",
                             url: "http://localhost:3000/ocpi/receiver/2.2/commands"
+                        },
+                        {
+                            identifier: "locations",
+                            role: "SENDER",
+                            url: "http://localhost:3000/ocpi/sender/2.2/locations"
                         }
                     ]
                 })

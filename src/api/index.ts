@@ -8,7 +8,8 @@ import { RegistrationService } from "../services/registration.service"
 import { stripVersions } from "../tools/tools"
 // import controllers
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
-import { VersionsController } from "./ocpi/v2_2/versions.controller"
+import { LocationsController } from "./ocpi/v2_2/locations.controller"
+import { VersionsController } from "./ocpi/versions.controller"
 
 // set basic home route
 const homeController = Router()
@@ -39,6 +40,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
 
     app.use("/ocpi/versions", VersionsController.getRoutes(options.publicBridgeURL, options.pluggableDB))
     app.use("/ocpi/receiver/2.2/commands", CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, pushService))
+    app.use("/ocpi/sender/2.2/locations", LocationsController.getRoutes(options.pluggableAPI, options.pluggableDB))
 
     return new Promise(async (resolve, reject) => {
         const server = app.listen(options.port || 3000, async (err?: Error) => {

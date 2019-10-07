@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from "express"
+import { Router } from "express"
 import { IncomingHttpHeaders } from "http"
 import fetch from "node-fetch"
 import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/commands"
@@ -7,6 +7,7 @@ import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
 import { PushService } from "../../../services/push.service"
 import { setResponseHeaders } from "../../../tools/tools"
+import { isAuthorized } from "./middleware/middleware"
 
 /**
  * OCPI 2.2 commands module controller
@@ -21,24 +22,13 @@ export class CommandsController {
         const router = Router()
 
         /**
-         * Express middleware to check for OCN client's TOKEN_C on incoming requests
-         */
-        const isAuthorized = async (req: Request, res: Response, next: NextFunction) => {
-            const tokenB = await pluggableDB.getTokenB()
-            if (req.headers.authorization !== `Token ${tokenB}`) {
-                return res.status(401).send(OcpiResponse.withMessage(4001, "Unauthorized"))
-            }
-            return next()
-        }
-
-        /**
          * OCPI command: CANCEL_RESERVATION
          */
-        router.post("/CANCEL_RESERVATION", isAuthorized, async (req, res) => {
+        router.post("/CANCEL_RESERVATION", isAuthorized(pluggableDB), async (req, res) => {
             // await initial response to cancel reservation request
             const response = await pluggableAPI.commands.cancelReservation(req.body.reservation_id)
             // send the initial response
-            res.send(OcpiResponse.withData(1000, response.commandResponse))
+            res.send(OcpiResponse.withData(response.commandResponse))
             // send the async response from the charge point
             await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
         })
@@ -46,13 +36,13 @@ export class CommandsController {
         /**
          * OCPI command: RESERVE_NOW
          */
-        router.post("/RESERVE_NOW", isAuthorized, async (req, res) => {
+        router.post("/RESERVE_NOW", isAuthorized(pluggableDB), async (req, res) => {
             // separate response_url from rest of body
             const { responseURL, out: reserveRequest } = this.extractResponseURL(req.body)
             // await initial response to reserve location/evse/connector
             const response = await pluggableAPI.commands.reserveNow(reserveRequest)
             // send initial response
-            res.send(OcpiResponse.withData(1000, response.commandResponse))
+            res.send(OcpiResponse.withData(response.commandResponse))
             // send the async response from the charge point
             await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
         })
@@ -60,7 +50,7 @@ export class CommandsController {
         /**
          * OCPI command: START_SESSION
          */
-        router.post("/START_SESSION", isAuthorized, async (req, res) => {
+        router.post("/START_SESSION", isAuthorized(pluggableDB), async (req, res) => {
             // separate response_url from rest of body
             const { responseURL, out: startRequest } = this.extractResponseURL(req.body)
             // prepare push functions
@@ -69,7 +59,7 @@ export class CommandsController {
             // await initial response from CPO
             const response = await pluggableAPI.commands.startSession(startRequest, sendSessionFunc, sendCdrFunc)
             // send the initial response
-            res.send(OcpiResponse.withData(1000, response.commandResponse))
+            res.send(OcpiResponse.withData(response.commandResponse))
             // send the async response from the charge point
             await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
         })
@@ -77,11 +67,11 @@ export class CommandsController {
         /**
          * OCPI command: STOP_SESSION
          */
-        router.post("/STOP_SESSION", isAuthorized, async (req, res) => {
+        router.post("/STOP_SESSION", isAuthorized(pluggableDB), async (req, res) => {
             // await the initial repsonse to stop a session
             const response = await pluggableAPI.commands.stopSession(req.body.session_id)
             // send the inital response
-            res.send(OcpiResponse.withData(1000, response.commandResponse))
+            res.send(OcpiResponse.withData(response.commandResponse))
             // send the async response from the charge point
             await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
         })
@@ -89,7 +79,7 @@ export class CommandsController {
         /**
          * OCPI command: UNLOCK_CONNECTOR
          */
-        router.post("/UNLOCK_CONNECTOR", isAuthorized, async (req, res) => {
+        router.post("/UNLOCK_CONNECTOR", isAuthorized(pluggableDB), async (req, res) => {
             // await the initial response to unlock the connector
             const response = await pluggableAPI.commands.unlockConnector(
                 req.body.location_id,
@@ -97,7 +87,7 @@ export class CommandsController {
                 req.body.connector_id
             )
             // send the initial response
-            res.send(OcpiResponse.withData(1000, response.commandResponse))
+            res.send(OcpiResponse.withData(response.commandResponse))
             // send the async response from the charge point
             await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
         })

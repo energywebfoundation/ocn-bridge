@@ -43,7 +43,7 @@ export const startOCNClient = async (port: number, events: EventEmitter = new Ev
     })
 
     mockOCNClient.get("/ocpi/versions", authorizationMiddleware("token-a"), async (_, res) => {
-        res.send(OcpiResponse.withData(1000, {
+        res.send(OcpiResponse.withData({
             versions: [
                 {
                     version: "2.2",
@@ -54,7 +54,7 @@ export const startOCNClient = async (port: number, events: EventEmitter = new Ev
     })
 
     mockOCNClient.get("/ocpi/versions/2.2", authorizationMiddleware("token-a"), async (_, res) => {
-        res.send(OcpiResponse.withData(1000, {
+        res.send(OcpiResponse.withData({
             version: "2.2",
             endpoints: [
                 {
@@ -67,12 +67,12 @@ export const startOCNClient = async (port: number, events: EventEmitter = new Ev
     })
 
     mockOCNClient.get("/ocpi/2.2/credentials", authorizationMiddleware("token-c"), async (_, res) => {
-        res.send(OcpiResponse.withData(1000, myCredentials))
+        res.send(OcpiResponse.withData(myCredentials))
     })
 
     mockOCNClient.post("/ocpi/2.2/credentials", authorizationMiddleware("token-a"), async (req, res) => {
         events.emit("CREDENTIALS_POST", req.body)
-        res.send(OcpiResponse.withData(1000, myCredentials))
+        res.send(OcpiResponse.withData(myCredentials))
     })
 
     mockOCNClient.post("/commands/START_SESSION/5", authorizationMiddleware("token-c"), async (req, res) => {

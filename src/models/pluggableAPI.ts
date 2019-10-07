@@ -1,5 +1,7 @@
 import { sendCdrFunc, sendSessionFunc } from "../services/push.service";
 import { IAsyncCommand } from "./ocpi/commands";
+import { IPaginationParams } from "./ocpi/common";
+import { IConnector, IEvse, ILocation } from "./ocpi/locations";
 import { IToken } from "./ocpi/tokens";
 
 export interface IReserveNow {
@@ -25,5 +27,11 @@ export interface IPluggableAPI {
         startSession(request: IStartSession, sendSession: sendSessionFunc, sendCdr: sendCdrFunc): Promise<IAsyncCommand>
         stopSession(sessionID: string): Promise<IAsyncCommand>
         unlockConnector(locationID: string, evseUID: string, connectorID: string): Promise<IAsyncCommand>
+    }
+    locations: {
+        getList(pagination?: IPaginationParams): Promise<ILocation[]>
+        getObject(id: string): Promise<ILocation | undefined>
+        getEvse(locationID: string, evseUID: string): Promise<IEvse | undefined>
+        getConnector(locationID: string, evseUID: string, connectorID: string): Promise<IConnector | undefined>
     }
 }

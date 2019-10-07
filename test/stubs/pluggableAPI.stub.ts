@@ -1,5 +1,7 @@
 import { CommandResponseType, CommandResultType, IAsyncCommand, ICommandResult } from "../../src/models/ocpi/commands";
+import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
 import { IPluggableAPI } from "../../src/models/pluggableAPI";
+import { testLocations } from "../data/test-data";
 
 const asyncCommandNotSupported = {
     commandResponse: {
@@ -43,6 +45,23 @@ export class PluggableAPIStub implements IPluggableAPI {
         },
         async unlockConnector(): Promise<IAsyncCommand> {
             return asyncCommandNotSupported
+        }
+    }
+    public locations = {
+        async getList(): Promise<ILocation[]> {
+            return testLocations
+        },
+        async getObject(): Promise<ILocation | undefined> {
+            return testLocations[0]
+        },
+        async getEvse(): Promise<IEvse | undefined> {
+            return testLocations[0].evses && testLocations[0].evses[0]
+        },
+        async getConnector(): Promise<IConnector | undefined> {
+            if (testLocations[0].evses && testLocations[0].evses[0]) {
+                return testLocations[0].evses[0].connectors[0]
+            }
+            return
         }
     }
 }
