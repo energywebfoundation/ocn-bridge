@@ -3,9 +3,9 @@ import { ethers } from "ethers"
 import { EventEmitter } from "events"
 import "mocha"
 import { stopServer } from "../../src/api/index"
-import { IPluggableDB } from "../../src/models/pluggableDB"
 import { IPluggableRegistry } from "../../src/models/ocn/pluggableRegistry"
 import { registryListing } from "../../src/models/ocn/registry"
+import { IPluggableDB } from "../../src/models/pluggableDB"
 import { RegistrationService } from "../../src/services/registration.service"
 import { testCredentials } from "../data/test-data"
 import { startOCNClient } from "../mock/ocn-client"
@@ -76,7 +76,7 @@ describe("Registration Service", () => {
             it(test.name, async () => {
                 const modifiedRegistrationService = new RegistrationService(test.registry, db)
                 const got = await modifiedRegistrationService.isListedInRegistry("DE", "MSP", {
-                    url: "http://localhost:3001", 
+                    url: "http://localhost:3001",
                     address: "0x63937aBd9308ad672Df9A2a1dcb1b38961f29C11"
                 })
                 assert.equal(got, test.want)

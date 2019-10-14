@@ -115,3 +115,40 @@ export const testLocations: ILocation[] = [
         "last_updated": "2015-06-29T20:39:09Z"
     }
 ]
+
+export const testTariffs: any[] = [
+    {
+        country_code: "DE",
+        party_id: "IGX",
+        id: "dai_ac",
+        currency: "DAI",
+        elements: [{
+          price_components: [{
+              type: "ENERGY",
+              price: 0.45,
+              step_size: 1000
+          }],
+          restrictions: {
+              max_kwh: 100
+          }
+        }],
+        last_updated: new Date(2019, 10, 5, 12, 0, 0, 0).toDateString()
+    },
+    {
+        country_code: "DE",
+        party_id: "IGX",
+        id: "dai_dc",
+        currency: "DAI",
+        elements: [{
+          price_components: [{
+              type: "FLAT",
+              price: 9,
+              step_size: 1
+          }],
+          restrictions: {
+              max_duration: 10800
+          }
+        }],
+        last_updated: new Date(2019, 10, 5, 12, 0, 0, 0).toDateString()
+    }
+]

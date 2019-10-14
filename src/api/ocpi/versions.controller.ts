@@ -41,6 +41,11 @@ export class VersionsController {
                         identifier: "locations",
                         role: "SENDER",
                         url: url.resolve(publicIP, "/ocpi/sender/2.2/locations")
+                    },
+                    {
+                        identifier: "tariffs",
+                        role: "SENDER",
+                        url: url.resolve(publicIP, "/ocpi/sender/2.2/tariffs")
                     }
                 ]
             }))

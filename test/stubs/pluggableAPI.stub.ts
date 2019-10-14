@@ -1,7 +1,8 @@
 import { CommandResponseType, CommandResultType, IAsyncCommand, ICommandResult } from "../../src/models/ocpi/commands";
 import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
+import { ITariff } from "../../src/models/ocpi/tarifffs";
 import { IPluggableAPI } from "../../src/models/pluggableAPI";
-import { testLocations } from "../data/test-data";
+import { testLocations, testTariffs } from "../data/test-data";
 
 const asyncCommandNotSupported = {
     commandResponse: {
@@ -62,6 +63,12 @@ export class PluggableAPIStub implements IPluggableAPI {
                 return testLocations[0].evses[0].connectors[0]
             }
             return
+        }
+    }
+
+    public tariffs = {
+        async getList(): Promise<ITariff[]> {
+            return testTariffs
         }
     }
 }

@@ -2,6 +2,7 @@ import { sendCdrFunc, sendSessionFunc } from "../services/push.service";
 import { IAsyncCommand } from "./ocpi/commands";
 import { IPaginationParams } from "./ocpi/common";
 import { IConnector, IEvse, ILocation } from "./ocpi/locations";
+import { ITariff } from "./ocpi/tarifffs";
 import { IToken } from "./ocpi/tokens";
 
 export interface IReserveNow {
@@ -34,4 +35,9 @@ export interface IPluggableAPI {
         getEvse(locationID: string, evseUID: string): Promise<IEvse | undefined>
         getConnector(locationID: string, evseUID: string, connectorID: string): Promise<IConnector | undefined>
     }
+
+    tariffs: {
+        getList(IPaginationParams?: IPaginationParams): Promise<ITariff[]>
+    }
+
 }
