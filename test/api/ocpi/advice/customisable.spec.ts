@@ -38,6 +38,16 @@ describe("Customisable Controller Advice", () => {
                         role: "RECEIVER",
                         url: "http://localhost:8080/ocpi/receiver/2.2/commands"
                     },
+                    {
+                        identifier: "sessions",
+                        role: "RECEIVER",
+                        url: "http://localhost:8080/ocpi/receiver/2.2/sessions"
+                    },
+                    {
+                      identifier: "cdrs",
+                      role: "RECEIVER",
+                      url: "http://localhost:8080/ocpi/receiver/2.2/cdrs"
+                    }
                 ]
             },
             {
@@ -72,6 +82,16 @@ describe("Customisable Controller Advice", () => {
                         role: "SENDER",
                         url: "https://big.company.com/ocpi/sender/2.2/commands"
                     },
+                    {
+                        identifier: "sessions",
+                        role: "RECEIVER",
+                        url: "https://big.company.com/ocpi/receiver/2.2/sessions"
+                    },
+                    {
+                        identifier: "cdrs",
+                        role: "RECEIVER",
+                        url: "https://big.company.com/ocpi/receiver/2.2/cdrs"
+                    }
                 ]
             },
             {

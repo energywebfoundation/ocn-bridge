@@ -14,12 +14,7 @@ export interface ITariff {
     min_price?: IPrice
     max_price?: IPrice
     elements: Array<{
-        price_components: Array<{
-            type: string
-            price: number
-            vat?: number
-            step_size: number
-        }>
+        price_components: IPriceComponent[]
         restrictions?: {
             start_time?: string
             end_time?: string
@@ -37,8 +32,8 @@ export interface ITariff {
             reservation?: string
         }
     }>
-    start_date_time?: Date
-    end_date_time?: Date
+    start_date_time?: string
+    end_date_time?: string
     energy_mix?: {
         is_green_energy: boolean
         energy_sources?: Array<{
@@ -52,5 +47,12 @@ export interface ITariff {
         supplier_name?: string
         energy_product_name?: string
     }
-    last_updated: Date
+    last_updated: string
+}
+
+export interface IPriceComponent {
+    type: "ENERGY" | "FLAT" | "PARKING_TIME" | "TIME"
+    price: number
+    vat?: number
+    step_size: number
 }

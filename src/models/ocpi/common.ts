@@ -1,4 +1,4 @@
-export type identifier = "commands" | "locations" | "tariffs"
+export type identifier = "commands" | "locations" | "tariffs" | "sessions" | "cdrs"
 export type role = "SENDER" | "RECEIVER"
 
 export interface IEndpoint {
@@ -61,4 +61,19 @@ export class OcpiResponse implements IResponse<any> {
 export interface IDisplayText {
     language: string
     text: string
+}
+
+export interface IBusinessDetails {
+    name: string
+    website?: string
+    logo?: IImage
+}
+
+export interface IImage {
+    url: string
+    thumbnail: string
+    category: string
+    type: string
+    width?: number
+    height?: number
 }

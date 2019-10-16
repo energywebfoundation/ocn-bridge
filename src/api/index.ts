@@ -8,8 +8,10 @@ import { RegistrationService } from "../services/registration.service"
 import { stripVersions } from "../tools/tools"
 import { isAuthorized } from "./ocpi/middleware/middleware"
 // import controllers
+import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
 import { LocationsController } from "./ocpi/v2_2/locations.controller"
+import { SessionsController } from "./ocpi/v2_2/sessions.controller"
 import { TariffsController } from "./ocpi/v2_2/tariffs.controller"
 import { VersionsController } from "./ocpi/versions.controller"
 
@@ -44,7 +46,9 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
         VersionsController.getRoutes(options.publicBridgeURL, options.modules),
         CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules, pushService),
         LocationsController.getRoutes(options.pluggableAPI, options.modules),
-        TariffsController.getRoutes(options.pluggableAPI, options.modules)
+        TariffsController.getRoutes(options.pluggableAPI, options.modules),
+        SessionsController.getRoutes(options.pluggableAPI, options.modules),
+        CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules)
     )
 
     return new Promise(async (resolve, reject) => {

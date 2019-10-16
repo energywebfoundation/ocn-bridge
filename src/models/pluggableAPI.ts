@@ -1,7 +1,9 @@
 import { sendCdrFunc, sendSessionFunc } from "../services/push.service";
+import { IChargeDetailRecord } from "./ocpi/cdrs";
 import { IAsyncCommand, ICommandResult } from "./ocpi/commands";
 import { IPaginationParams } from "./ocpi/common";
 import { IConnector, IEvse, ILocation } from "./ocpi/locations";
+import { ISession } from "./ocpi/session";
 import { ITariff } from "./ocpi/tariffs";
 import { IToken } from "./ocpi/tokens";
 
@@ -42,11 +44,20 @@ export interface IPluggableAPI {
             getConnector(locationID: string, evseUID: string, connectorID: string): Promise<IConnector | undefined>
         }
     }
-
     tariffs?: {
         sender?: {
             getList(IPaginationParams?: IPaginationParams): Promise<ITariff[]>
         }
     }
-
+    sessions?: {
+        receiver?: {
+            update(session: ISession): void
+        }
+    }
+    cdrs?: {
+        receiver?: {
+            get(id: string): Promise<IChargeDetailRecord | undefined>
+            create(cdr: IChargeDetailRecord): void
+        }
+    }
 }

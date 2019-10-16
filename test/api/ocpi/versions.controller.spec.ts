@@ -2,12 +2,12 @@ import { assert } from "chai"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
-import { startServer, stopServer } from "../../../../src/api/index"
-import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
-import { testRoles } from "../../../data/test-data"
-import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
-import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
-import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { startServer, stopServer } from "../../../src/api/index"
+import { ModuleImplementation } from "../../../src/models/bridgeConfigurationOptions"
+import { testRoles } from "../../data/test-data"
+import { PluggableAPIStub } from "../../stubs/pluggableAPI.stub"
+import { PluggableDBStub } from "../../stubs/pluggableDB.stub"
+import { PluggableRegistryStub } from "../../stubs/pluggableRegistry.stub"
 
 describe("OCPI Versions Controller", () => {
 
@@ -91,6 +91,16 @@ describe("OCPI Versions Controller", () => {
                             identifier: "commands",
                             role: "RECEIVER",
                             url: "http://localhost:3000/ocpi/receiver/2.2/commands"
+                        },
+                        {
+                            identifier: "sessions",
+                            role: "RECEIVER",
+                            url: "http://localhost:3000/ocpi/receiver/2.2/sessions"
+                        },
+                        {
+                            identifier: "cdrs",
+                            role: "RECEIVER",
+                            url: "http://localhost:3000/ocpi/receiver/2.2/cdrs"
                         }
                     ]
                 })

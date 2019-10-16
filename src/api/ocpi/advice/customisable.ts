@@ -9,7 +9,7 @@ interface INeededModules {
 }
 
 /**
- * Module Customisation Advice for OCPI controllers
+ * OCPI Module Customisation Advice for OCPI controllers
  */
 export class CustomisableController {
 
@@ -64,7 +64,7 @@ export class CustomisableController {
         switch (modules.implementation) {
             case ModuleImplementation.ALL:
                 needed.SENDER = ["commands", "locations", "tariffs"],
-                needed.RECEIVER = ["commands"]
+                needed.RECEIVER = ["commands", "sessions", "cdrs"]
                 break
             case ModuleImplementation.CPO:
                 needed.SENDER = ["locations", "tariffs"],
@@ -72,7 +72,7 @@ export class CustomisableController {
                 break
             case ModuleImplementation.MSP:
                 needed.SENDER = ["commands"],
-                needed.RECEIVER = []
+                needed.RECEIVER = ["sessions", "cdrs"]
                 break
             case ModuleImplementation.CUSTOM:
                 if (!modules.sender || !modules.receiver) {

@@ -1,15 +1,16 @@
-import { ICdrToken, IChargingPeriod, IPrice } from "./session";
+import { connectorFormat, connectorPowerType, connectorStandard, IGeoLocation } from "./locations";
+import { authMethod, ICdrToken, IChargingPeriod, IPrice } from "./session";
 import { ITariff } from "./tariffs";
 
 export interface IChargeDetailRecord {
     country_code: string
     party_id: string
     id: string
-    start_date_time: Date
-    end_date_time: Date
+    start_date_time: string
+    end_date_time: string
     session_id?: string
     cdr_token: ICdrToken
-    auth_method: string
+    auth_method: authMethod
     authorization_reference?: string
     cdr_location: ICdrLocation
     meter_id?: string
@@ -30,7 +31,7 @@ export interface IChargeDetailRecord {
     invoice_reference_id?: string
     credit?: boolean
     credit_reference_id?: string
-    last_updated: Date
+    last_updated: string
 }
 
 export interface ISignedData {
@@ -45,11 +46,6 @@ export interface ISignedData {
     url: string
 }
 
-export interface IGeoLocation {
-    latitude: string
-    longitude: string
-}
-
 export interface ICdrLocation {
     id: string
     name?: string
@@ -61,7 +57,7 @@ export interface ICdrLocation {
     evse_uid: string
     evse_id: string
     connector_id: string
-    connector_standard: string
-    connector_format: string
-    connector_power_type: string
+    connector_standard: connectorStandard
+    connector_format: connectorFormat
+    connector_power_type: connectorPowerType
 }

@@ -1,5 +1,8 @@
-import { ICredentials, IRole } from "../../src/models/ocpi/credentials"
-import { ILocation } from "../../src/models/ocpi/locations"
+import { IChargeDetailRecord } from "../../src/models/ocpi/cdrs";
+import { ICredentials, IRole } from "../../src/models/ocpi/credentials";
+import { ILocation } from "../../src/models/ocpi/locations";
+import { ISession } from "../../src/models/ocpi/session";
+import { ITariff } from "../../src/models/ocpi/tariffs";
 import { IToken } from "../../src/models/ocpi/tokens";
 
 export const testRoles: IRole[] = [
@@ -116,23 +119,23 @@ export const testLocations: ILocation[] = [
     }
 ]
 
-export const testTariffs: any[] = [
+export const testTariffs: ITariff[] = [
     {
         country_code: "DE",
         party_id: "IGX",
         id: "dai_ac",
         currency: "DAI",
         elements: [{
-          price_components: [{
-              type: "ENERGY",
-              price: 0.45,
-              step_size: 1000
-          }],
-          restrictions: {
-              max_kwh: 100
-          }
+            price_components: [{
+                type: "ENERGY",
+                price: 0.45,
+                step_size: 1000
+            }],
+            restrictions: {
+                max_kwh: 100
+            }
         }],
-        last_updated: new Date(2019, 10, 5, 12, 0, 0, 0).toDateString()
+        last_updated: new Date(2019, 10, 5, 12, 0, 0, 0).toISOString()
     },
     {
         country_code: "DE",
@@ -140,15 +143,80 @@ export const testTariffs: any[] = [
         id: "dai_dc",
         currency: "DAI",
         elements: [{
-          price_components: [{
-              type: "FLAT",
-              price: 9,
-              step_size: 1
-          }],
-          restrictions: {
-              max_duration: 10800
-          }
+            price_components: [{
+                type: "FLAT",
+                price: 9,
+                step_size: 1
+            }],
+            restrictions: {
+                max_duration: 10800
+            }
         }],
-        last_updated: new Date(2019, 10, 5, 12, 0, 0, 0).toDateString()
+        last_updated: new Date(2019, 10, 5, 12, 0, 0, 0).toISOString()
     }
 ]
+
+export const testSession: ISession = {
+    country_code: "DE",
+    party_id: "CPO",
+    id: "1234",
+    start_date_time: new Date().toISOString(),
+    kwh: 1.5,
+    cdr_token: {
+        uid: "1111",
+        contract_id: "010203",
+        type: "AD_HOC_USER"
+    },
+    auth_method: "COMMAND",
+    location_id: "loc1",
+    evse_uid: "123",
+    connector_id: "1",
+    currency: "EUR",
+    status: "ACTIVE",
+    last_updated: new Date().toISOString()
+}
+
+export const testCdr: IChargeDetailRecord = {
+    country_code: "DE",
+    party_id: "CPO",
+    id: "55",
+    start_date_time: new Date(1571216038071).toISOString(),
+    end_date_time: new Date(1571216086027).toISOString(),
+    cdr_token: {
+        uid: "1111",
+        contract_id: "010203",
+        type: "AD_HOC_USER"
+    },
+    auth_method: "COMMAND",
+    cdr_location: {
+        id: "loc1",
+        address: "some-street 1",
+        city: "Berlin",
+        postal_code: "33333",
+        country: "DE",
+        coordinates: {
+            latitude: "0.0",
+            longitude: "0.0"
+        },
+        evse_uid: "123",
+        evse_id: "123",
+        connector_id: "1",
+        connector_format: "SOCKET",
+        connector_standard: "IEC_62196_T2",
+        connector_power_type: "AC_3_PHASE"
+    },
+    currency: "EUR",
+    charging_periods: [{
+        start_date_time: new Date(1571216038071).toISOString(),
+        dimensions: [{
+            type: "ENERGY",
+            volume: 2.5
+        }]
+    }],
+    total_cost: {
+        excl_vat: 6
+    },
+    total_energy: 2.5,
+    total_time: 1.7,
+    last_updated: new Date().toISOString()
+}

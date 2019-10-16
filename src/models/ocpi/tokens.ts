@@ -2,7 +2,7 @@ export interface IToken {
     country_code: string
     party_id: string
     uid: string
-    type: string
+    type: ITokenType
     contract_id: string
     visual_number?: string
     issuer: string
@@ -17,3 +17,5 @@ export interface IToken {
     }
     last_updated: string
 }
+
+export type ITokenType = "AD_HOC_USER" | "APP_USER" | "OTHER" | "RFID"
