@@ -6,6 +6,7 @@ import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOption
 import { PushService } from "../services/push.service"
 import { RegistrationService } from "../services/registration.service"
 import { stripVersions } from "../tools/tools"
+import { isAuthorized } from "./ocpi/middleware/middleware"
 // import controllers
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
 import { LocationsController } from "./ocpi/v2_2/locations.controller"
@@ -20,15 +21,13 @@ homeController.get("/", async (_, res) => {
 
 /**
  * Bootstrap a new OCN Bridge server with OCPI interface. Will attempt to register on start.
- * @param options an object of configuration options
- *      - logger {boolean} - sets whether to log to stdout using morgan
- *      - pluggableAPI {IPluggableAPI} - a class to handle incoming OCPI requests
+ * @param options an object of configuration options (must implement IBridgeConfigurationOptions)
  * @returns a promise resolving with the newly created http.Server
  */
 export const startServer = async (options: IBridgeConfigurationOptions): Promise<Server> => {
 
     const app = express()
-    app.use(bodyParser.urlencoded({extended: true}))
+    app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
 
     if (options.logger) {
@@ -39,10 +38,14 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
 
     const pushService = new PushService(options.pluggableDB)
 
-    app.use("/ocpi/versions", VersionsController.getRoutes(options.publicBridgeURL, options.pluggableDB))
-    app.use("/ocpi/receiver/2.2/commands", CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, pushService))
-    app.use("/ocpi/sender/2.2/locations", LocationsController.getRoutes(options.pluggableAPI, options.pluggableDB))
-    app.use("/ocpi/sender/2.2/tariffs", TariffsController.getRoutes(options.pluggableAPI, options.pluggableDB))
+    app.use(
+        "/ocpi/",
+        isAuthorized(options.pluggableDB),
+        VersionsController.getRoutes(options.publicBridgeURL, options.modules),
+        CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules, pushService),
+        LocationsController.getRoutes(options.pluggableAPI, options.modules),
+        TariffsController.getRoutes(options.pluggableAPI, options.modules)
+    )
 
     return new Promise(async (resolve, reject) => {
         const server = app.listen(options.port || 3000, async (err?: Error) => {

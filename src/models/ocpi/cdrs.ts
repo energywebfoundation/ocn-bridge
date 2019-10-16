@@ -1,5 +1,5 @@
 import { ICdrToken, IChargingPeriod, IPrice } from "./session";
-import { ITariff } from "./tarifffs";
+import { ITariff } from "./tariffs";
 
 export interface IChargeDetailRecord {
     country_code: string

@@ -1,96 +1,122 @@
 import { Router } from "express"
 import { IncomingHttpHeaders } from "http"
 import fetch from "node-fetch"
+import { IModules } from "../../../models/bridgeConfigurationOptions"
 import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/commands"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
 import { PushService } from "../../../services/push.service"
 import { setResponseHeaders } from "../../../tools/tools"
-import { isAuthorized } from "./middleware/middleware"
+import { CustomisableController } from "../advice/customisable"
 
 /**
  * OCPI 2.2 commands module controller
  */
-export class CommandsController {
+export class CommandsController extends CustomisableController {
 
     /**
      * Establish routes for the commands controller
      * @param pluggableAPI inject a pluggable API object to use in request handling
      */
-    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB, pushService: PushService): Router {
+    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB, modules: IModules, pushService: PushService): Router {
         const router = Router()
 
         /**
-         * OCPI command: CANCEL_RESERVATION
+         * SENDER interface
          */
-        router.post("/CANCEL_RESERVATION", isAuthorized(pluggableDB), async (req, res) => {
-            // await initial response to cancel reservation request
-            const response = await pluggableAPI.commands.cancelReservation(req.body.reservation_id)
-            // send the initial response
-            res.send(OcpiResponse.withData(response.commandResponse))
-            // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
-        })
+        if (this.isIncluded("commands", "SENDER", modules, pluggableAPI)) {
+
+            /**
+             * Receive async command result from CPO
+             */
+            router.post("/sender/2.2/commands/:command/:uid", async (req, res) => {
+                pluggableAPI.commands!.sender!.asyncResult(req.params.command, req.params.uid, req.body)
+                res.send(OcpiResponse.basicSuccess())
+            })
+        }
 
         /**
-         * OCPI command: RESERVE_NOW
+         * RECEIVER interface
          */
-        router.post("/RESERVE_NOW", isAuthorized(pluggableDB), async (req, res) => {
-            // separate response_url from rest of body
-            const { responseURL, out: reserveRequest } = this.extractResponseURL(req.body)
-            // await initial response to reserve location/evse/connector
-            const response = await pluggableAPI.commands.reserveNow(reserveRequest)
-            // send initial response
-            res.send(OcpiResponse.withData(response.commandResponse))
-            // send the async response from the charge point
-            await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
-        })
+        if (this.isIncluded("commands", "RECEIVER", modules, pluggableAPI)) {
 
-        /**
-         * OCPI command: START_SESSION
-         */
-        router.post("/START_SESSION", isAuthorized(pluggableDB), async (req, res) => {
-            // separate response_url from rest of body
-            const { responseURL, out: startRequest } = this.extractResponseURL(req.body)
-            // prepare push functions
-            const sendSessionFunc = pushService.prepareSessionUpdate(req.headers)
-            const sendCdrFunc = pushService.prepareCDR(req.headers)
-            // await initial response from CPO
-            const response = await pluggableAPI.commands.startSession(startRequest, sendSessionFunc, sendCdrFunc)
-            // send the initial response
-            res.send(OcpiResponse.withData(response.commandResponse))
-            // send the async response from the charge point
-            await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
-        })
+            /**
+             * OCPI command: CANCEL_RESERVATION
+             */
+            router.post("/receiver/2.2/commands/CANCEL_RESERVATION", async (req, res) => {
+                // await initial response to cancel reservation request
+                const response = await pluggableAPI.commands!.receiver!.cancelReservation(req.body.reservation_id)
+                // send the initial response
+                res.send(OcpiResponse.withData(response.commandResponse))
+                // send the async response from the charge point
+                await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
+            })
 
-        /**
-         * OCPI command: STOP_SESSION
-         */
-        router.post("/STOP_SESSION", isAuthorized(pluggableDB), async (req, res) => {
-            // await the initial repsonse to stop a session
-            const response = await pluggableAPI.commands.stopSession(req.body.session_id)
-            // send the inital response
-            res.send(OcpiResponse.withData(response.commandResponse))
-            // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
-        })
+            /**
+             * OCPI command: RESERVE_NOW
+             */
+            router.post("/receiver/2.2/commands/RESERVE_NOW", async (req, res) => {
+                // separate response_url from rest of body
+                const { responseURL, out: reserveRequest } = this.extractResponseURL(req.body)
+                // await initial response to reserve location/evse/connector
+                const response = await pluggableAPI.commands!.receiver!.reserveNow(reserveRequest)
+                // send initial response
+                res.send(OcpiResponse.withData(response.commandResponse))
+                // send the async response from the charge point
+                await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
+            })
 
-        /**
-         * OCPI command: UNLOCK_CONNECTOR
-         */
-        router.post("/UNLOCK_CONNECTOR", isAuthorized(pluggableDB), async (req, res) => {
-            // await the initial response to unlock the connector
-            const response = await pluggableAPI.commands.unlockConnector(
-                req.body.location_id,
-                req.body.evse_uid,
-                req.body.connector_id
-            )
-            // send the initial response
-            res.send(OcpiResponse.withData(response.commandResponse))
-            // send the async response from the charge point
-            await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
-        })
+            /**
+             * OCPI command: START_SESSION
+             */
+            router.post("/receiver/2.2/commands/START_SESSION", async (req, res) => {
+                // separate response_url from rest of body
+                const { responseURL, out: startRequest } = this.extractResponseURL(req.body)
+                // prepare push functions
+                const sendSessionFunc = pushService.prepareSessionUpdate(req.headers)
+                const sendCdrFunc = pushService.prepareCDR(req.headers)
+                // await initial response from CPO
+                const response = await pluggableAPI.commands!.receiver!.startSession(
+                    startRequest,
+                    sendSessionFunc,
+                    sendCdrFunc
+                )
+                // send the initial response
+                res.send(OcpiResponse.withData(response.commandResponse))
+                // send the async response from the charge point
+                await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
+            })
+
+            /**
+             * OCPI command: STOP_SESSION
+             */
+            router.post("/receiver/2.2/commands/STOP_SESSION", async (req, res) => {
+                // await the initial repsonse to stop a session
+                const response = await pluggableAPI.commands!.receiver!.stopSession(req.body.session_id)
+                // send the inital response
+                res.send(OcpiResponse.withData(response.commandResponse))
+                // send the async response from the charge point
+                await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
+            })
+
+            /**
+             * OCPI command: UNLOCK_CONNECTOR
+             */
+            router.post("/receiver/2.2/commands/UNLOCK_CONNECTOR", async (req, res) => {
+                // await the initial response to unlock the connector
+                const response = await pluggableAPI.commands!.receiver!.unlockConnector(
+                    req.body.location_id,
+                    req.body.evse_uid,
+                    req.body.connector_id
+                )
+                // send the initial response
+                res.send(OcpiResponse.withData(response.commandResponse))
+                // send the async response from the charge point
+                await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
+            })
+
+        }
 
         return router
     }
@@ -100,7 +126,7 @@ export class CommandsController {
      * @param body OCPI request body (i.e. StartSession, ReserveNow)
      * @returns the separated response_url and body
      */
-    private static extractResponseURL(body: any): { responseURL: string, out: any} {
+    private static extractResponseURL(body: any): { responseURL: string, out: any } {
         const responseURL = body.response_url
         delete body.response_url
         return {

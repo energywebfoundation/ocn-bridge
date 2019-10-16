@@ -3,6 +3,7 @@ import { Server } from "http"
 import "mocha"
 import fetch from "node-fetch"
 import { startServer, stopServer } from "../../src/api/index"
+import { ModuleImplementation } from "../../src/models/bridgeConfigurationOptions"
 import { testRoles } from "../data/test-data"
 import { PluggableAPIStub } from "../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../stubs/pluggableDB.stub"
@@ -17,6 +18,9 @@ describe("API context", () => {
             publicBridgeURL: "http://localhost:3000",
             ocnClientURL: "http://localhost:3001",
             roles: testRoles,
+            modules: {
+                implementation: ModuleImplementation.ALL
+            },
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: new PluggableDBStub(),
             pluggableRegistry: new PluggableRegistryStub(),

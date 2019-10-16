@@ -1,70 +1,77 @@
 import { Router } from "express"
+import { IModules } from "../../../models/bridgeConfigurationOptions"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
-import { IPluggableDB } from "../../../models/pluggableDB"
 import { formatPaginationParams } from "../../../tools/tools"
-import { isAuthorized } from "./middleware/middleware"
+import { CustomisableController } from "../advice/customisable"
 
 /**
  * OCPI 2.2 commands module controller
  */
-export class LocationsController {
+export class LocationsController extends CustomisableController {
 
     /**
      * Establish routes for the commands controller
      * @param pluggableAPI inject a pluggable API object to use in request handling
      */
-    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB): Router {
+    public static getRoutes(pluggableAPI: IPluggableAPI, modules: IModules): Router {
         const router = Router()
 
         /**
-         * GET location list
+         * SENDER interface
          */
-        router.get("/", isAuthorized(pluggableDB), async (req, res) => {
-            const params = formatPaginationParams(req.query)
-            const locations = await pluggableAPI.locations.getList(params)
-            res.send(OcpiResponse.withData(locations))
-        })
+        if (this.isIncluded("locations", "SENDER", modules, pluggableAPI)) {
 
-        /**
-         * Get location
-         */
-        router.get("/:id", isAuthorized(pluggableDB), async (req, res) => {
-            const location = await pluggableAPI.locations.getObject(req.params.id)
-            if (location) {
-                res.send(OcpiResponse.withData(location))
-            } else {
-                res.send(OcpiResponse.withMessage(2003, "Unknown location"))
-            }
-        })
+            /**
+             * GET location list
+             */
+            router.get("/sender/2.2/locations", async (req, res) => {
+                const params = formatPaginationParams(req.query)
+                const locations = await pluggableAPI.locations!.sender!.getList(params)
+                res.send(OcpiResponse.withData(locations))
+            })
 
-        /**
-         * Get EVSE
-         */
-        router.get("/:id/:evse", isAuthorized(pluggableDB), async (req, res) => {
-            const evse = await pluggableAPI.locations.getEvse(req.params.id, req.params.evse)
-            if (evse) {
-                res.send(OcpiResponse.withData(evse))
-            } else {
-                res.send(OcpiResponse.withMessage(2003, "Unknown EVSE"))
-            }
-        })
+            /**
+             * Get location
+             */
+            router.get("/sender/2.2/locations/:id", async (req, res) => {
+                const location = await pluggableAPI.locations!.sender!.getObject(req.params.id)
+                if (location) {
+                    res.send(OcpiResponse.withData(location))
+                } else {
+                    res.send(OcpiResponse.withMessage(2003, "Unknown location"))
+                }
+            })
 
-        /**
-         * Get Connector
-         */
-        router.get("/:id/:evse/:connector", isAuthorized(pluggableDB), async (req, res) => {
-            const connector = await pluggableAPI.locations.getConnector(
-                req.params.id,
-                req.params.evse,
-                req.params.connectors
-            )
-            if (connector) {
-                res.send(OcpiResponse.withData(connector))
-            } else {
-                res.send(OcpiResponse.withMessage(2003, "Unknown connector"))
-            }
-        })
+            /**
+             * Get EVSE
+             */
+            router.get("/sender/2.2/locations/:id/:evse", async (req, res) => {
+                const evse = await pluggableAPI.locations!.sender!.getEvse(req.params.id, req.params.evse)
+                if (evse) {
+                    res.send(OcpiResponse.withData(evse))
+                } else {
+                    res.send(OcpiResponse.withMessage(2003, "Unknown EVSE"))
+                }
+            })
+
+            /**
+             * Get Connector
+             */
+            router.get("/sender/2.2/locations/:id/:evse/:connector", async (req, res) => {
+                const connector = await pluggableAPI.locations!.sender!.getConnector(
+                    req.params.id,
+                    req.params.evse,
+                    req.params.connectors
+                )
+                if (connector) {
+                    res.send(OcpiResponse.withData(connector))
+                } else {
+                    res.send(OcpiResponse.withMessage(2003, "Unknown connector"))
+                }
+            })
+
+        }
 
         return router
     }

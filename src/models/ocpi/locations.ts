@@ -89,19 +89,19 @@ export interface IEnergyMix {
 
 export interface IHours {
     twentyfourseven: boolean
-    regular_hours?: {
+    regular_hours?: Array<{
         weekday: number
         period_begin: string
         period_end: string
-    }
-    expectional_openings?: {
+    }>
+    expectional_openings?: Array<{
         period_begin: string
         period_end: string
-    }
-    expectional_closings?: {
+    }>
+    expectional_closings?: Array<{
         period_begin: string
         period_end: string
-    }
+    }>
 }
 
 export interface IImage {

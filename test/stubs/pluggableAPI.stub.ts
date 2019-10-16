@@ -1,6 +1,6 @@
 import { CommandResponseType, CommandResultType, IAsyncCommand, ICommandResult } from "../../src/models/ocpi/commands";
 import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
-import { ITariff } from "../../src/models/ocpi/tarifffs";
+import { ITariff } from "../../src/models/ocpi/tariffs";
 import { IPluggableAPI } from "../../src/models/pluggableAPI";
 import { testLocations, testTariffs } from "../data/test-data";
 
@@ -32,43 +32,54 @@ const asyncCommandAccepted = {
  */
 export class PluggableAPIStub implements IPluggableAPI {
     public commands = {
-        async cancelReservation(): Promise<IAsyncCommand> {
-            return asyncCommandNotSupported
+        sender: {
+            asyncResult(): void {
+                return
+            }
         },
-        async reserveNow(): Promise<IAsyncCommand> {
-            return asyncCommandNotSupported
-        },
-        async startSession(): Promise<IAsyncCommand> {
-            return asyncCommandAccepted
-        },
-        async stopSession(): Promise<IAsyncCommand> {
-            return asyncCommandAccepted
-        },
-        async unlockConnector(): Promise<IAsyncCommand> {
-            return asyncCommandNotSupported
+        receiver: {
+            async cancelReservation(): Promise<IAsyncCommand> {
+                return asyncCommandNotSupported
+            },
+            async reserveNow(): Promise<IAsyncCommand> {
+                return asyncCommandNotSupported
+            },
+            async startSession(): Promise<IAsyncCommand> {
+                return asyncCommandAccepted
+            },
+            async stopSession(): Promise<IAsyncCommand> {
+                return asyncCommandAccepted
+            },
+            async unlockConnector(): Promise<IAsyncCommand> {
+                return asyncCommandNotSupported
+            }
         }
     }
     public locations = {
-        async getList(): Promise<ILocation[]> {
-            return testLocations
-        },
-        async getObject(): Promise<ILocation | undefined> {
-            return testLocations[0]
-        },
-        async getEvse(): Promise<IEvse | undefined> {
-            return testLocations[0].evses && testLocations[0].evses[0]
-        },
-        async getConnector(): Promise<IConnector | undefined> {
-            if (testLocations[0].evses && testLocations[0].evses[0]) {
-                return testLocations[0].evses[0].connectors[0]
+        sender: {
+            async getList(): Promise<ILocation[]> {
+                return testLocations
+            },
+            async getObject(): Promise<ILocation | undefined> {
+                return testLocations[0]
+            },
+            async getEvse(): Promise<IEvse | undefined> {
+                return testLocations[0].evses && testLocations[0].evses[0]
+            },
+            async getConnector(): Promise<IConnector | undefined> {
+                if (testLocations[0].evses && testLocations[0].evses[0]) {
+                    return testLocations[0].evses[0].connectors[0]
+                }
+                return
             }
-            return
         }
     }
 
     public tariffs = {
-        async getList(): Promise<ITariff[]> {
-            return testTariffs
+        sender: {
+            async getList(): Promise<ITariff[]> {
+                return testTariffs
+            }
         }
     }
 }

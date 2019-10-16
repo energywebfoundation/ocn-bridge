@@ -3,6 +3,7 @@ import { Server } from "http"
 import "mocha"
 import request from "supertest"
 import { startServer, stopServer } from "../../../../src/api/index"
+import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles } from "../../../data/test-data"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
@@ -21,6 +22,7 @@ describe("OCPI Versions Controller", () => {
             publicBridgeURL: "http://localhost:3000/",
             ocnClientURL: "http::/localhost:3001",
             roles: testRoles,
+            modules: { implementation: ModuleImplementation.ALL },
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: db,
             pluggableRegistry: new PluggableRegistryStub(),
@@ -72,8 +74,8 @@ describe("OCPI Versions Controller", () => {
                     endpoints: [
                         {
                             identifier: "commands",
-                            role: "RECEIVER",
-                            url: "http://localhost:3000/ocpi/receiver/2.2/commands"
+                            role: "SENDER",
+                            url: "http://localhost:3000/ocpi/sender/2.2/commands"
                         },
                         {
                             identifier: "locations",
@@ -84,6 +86,11 @@ describe("OCPI Versions Controller", () => {
                             identifier: "tariffs",
                             role: "SENDER",
                             url: "http://localhost:3000/ocpi/sender/2.2/tariffs"
+                        },
+                        {
+                            identifier: "commands",
+                            role: "RECEIVER",
+                            url: "http://localhost:3000/ocpi/receiver/2.2/commands"
                         }
                     ]
                 })

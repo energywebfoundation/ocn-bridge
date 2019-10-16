@@ -5,6 +5,7 @@ import { Server } from "http"
 import "mocha"
 import request from "supertest"
 import { startServer, stopServer } from "../../../../src/api/index"
+import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testToken } from "../../../data/test-data"
 import { startOCNClient } from "../../../mock/ocn-client"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
@@ -30,6 +31,11 @@ describe("OCPI Commands Controller", () => {
             publicBridgeURL: "http://localhost:3000",
             ocnClientURL: "http://localhost:3001",
             roles: testRoles,
+            modules: {
+                implementation: ModuleImplementation.CUSTOM,
+                sender: ["commands"],
+                receiver: ["commands"]
+            },
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: db,
             pluggableRegistry: new PluggableRegistryStub(),
@@ -42,6 +48,36 @@ describe("OCPI Commands Controller", () => {
     afterEach(async () => {
         await stopServer(app)
         await stopServer(ocnClient)
+    })
+
+    context("Sender interface", () => {
+
+        it("should return 1000", (done) => {
+
+            request(app)
+                .post("/ocpi/sender/2.2/commands/START_SESSION/1234")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send({
+                    result: "ACCEPTED"
+                })
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+
+                    assert.equal(result.body.status_code, 1000)
+                    done()
+                })
+
+        })
+
     })
 
     context("Receiver interface", () => {

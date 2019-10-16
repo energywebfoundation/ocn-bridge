@@ -49,12 +49,21 @@ startBridge({
             party_id: "SUP"
         }
     ],
+
+    // specify the desired OCPI modules to be shared (must match pluggableAPI below)
+    // must implement IModules
+    modules: {
+        implementation: ModuleImplementation.CUSTOM,
+        // sender and receiver only needed if implmentation is CUSTOM
+        sender: ["locations"],
+        receiver: []
+    }
     
     // EMSP or CPO Backoffice API plug-in to use; must implement IPluggableAPI
     pluggableAPI: new PluggableAPI(),          
     
     // Interface providing getting/setting of important OCPI variables (token auth, endpoints, etc.)
-    // must implmenet IPluggableDB
+    // must implement IPluggableDB
     pluggableDB: new PluggableDB(),
     
     // Interface providing writing/reading from an OCN Registry

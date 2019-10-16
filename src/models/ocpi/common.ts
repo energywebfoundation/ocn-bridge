@@ -1,3 +1,12 @@
+export type identifier = "commands" | "locations" | "tariffs"
+export type role = "SENDER" | "RECEIVER"
+
+export interface IEndpoint {
+    identifier: string
+    role: string
+    url: string
+}
+
 export interface IHeaders {
     "X-Request-ID": string
     "X-Correlation-ID": string

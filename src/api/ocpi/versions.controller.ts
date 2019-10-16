@@ -1,22 +1,17 @@
-import { NextFunction, Request, Response, Router } from "express"
+import { Router } from "express"
 import * as url from "url"
+import { IModules } from "../../models/bridgeConfigurationOptions"
 import { OcpiResponse } from "../../models/ocpi/common"
-import { IPluggableDB } from "../../models/pluggableDB"
+import { CustomisableController } from "./advice/customisable"
 
-export class VersionsController {
+export class VersionsController extends CustomisableController {
 
-    public static getRoutes(publicIP: string, pluggableDB: IPluggableDB): Router {
+    public static getRoutes(publicIP: string, modules: IModules): Router {
         const router = Router()
 
-        const isAuthorized = async (req: Request, res: Response, next: NextFunction) => {
-            const tokenB = await pluggableDB.getTokenB()
-            if (req.headers.authorization !== `Token ${tokenB}`) {
-                return res.status(401).send(OcpiResponse.withMessage(2001, "Unauthorized"))
-            }
-            return next()
-        }
+        const endpoints = this.getNeededEndpoints(publicIP, modules)
 
-        router.get("/", isAuthorized, async (_, res) => {
+        router.get("/versions", async (_, res) => {
             res.send(OcpiResponse.withData({
                 versions: [
                     {
@@ -27,29 +22,13 @@ export class VersionsController {
             }))
         })
 
-        router.get("/2.2", isAuthorized, async (_, res) => {
-            // TODO: configurable endpoints
+        router.get("/versions/2.2", async (_, res) => {
             res.send(OcpiResponse.withData({
                 version: "2.2",
-                endpoints: [
-                    {
-                        identifier: "commands",
-                        role: "RECEIVER",
-                        url: url.resolve(publicIP, "/ocpi/receiver/2.2/commands")
-                    },
-                    {
-                        identifier: "locations",
-                        role: "SENDER",
-                        url: url.resolve(publicIP, "/ocpi/sender/2.2/locations")
-                    },
-                    {
-                        identifier: "tariffs",
-                        role: "SENDER",
-                        url: url.resolve(publicIP, "/ocpi/sender/2.2/tariffs")
-                    }
-                ]
+                endpoints
             }))
         })
+
         return router
     }
 

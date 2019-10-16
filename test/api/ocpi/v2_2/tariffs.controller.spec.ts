@@ -3,6 +3,7 @@ import { Server } from "http"
 import "mocha"
 import request from "supertest"
 import { startServer, stopServer } from "../../../../src/api/index"
+import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testTariffs } from "../../../data/test-data"
 import { startOCNClient } from "../../../mock/ocn-client"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
@@ -24,6 +25,11 @@ describe("OCPI Tariffs Controller", () => {
             publicBridgeURL: "http://localhost:3000",
             ocnClientURL: "http://localhost:3001",
             roles: testRoles,
+            modules: {
+                implementation: ModuleImplementation.CUSTOM,
+                sender: ["tariffs"],
+                receiver: []
+            },
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: db,
             pluggableRegistry: new PluggableRegistryStub(),
