@@ -63,11 +63,11 @@ export class CustomisableController {
 
         switch (modules.implementation) {
             case ModuleImplementation.ALL:
-                needed.SENDER = ["commands", "locations", "tariffs"],
+                needed.SENDER = ["commands", "locations", "tariffs", "cdrs"],
                 needed.RECEIVER = ["commands", "sessions", "cdrs"]
                 break
             case ModuleImplementation.CPO:
-                needed.SENDER = ["locations", "tariffs"],
+                needed.SENDER = ["locations", "tariffs", "cdrs"],
                 needed.RECEIVER = ["commands"]
                 break
             case ModuleImplementation.MSP:

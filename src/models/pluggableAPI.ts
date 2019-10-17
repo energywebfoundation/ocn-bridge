@@ -59,5 +59,8 @@ export interface IPluggableAPI {
             get(id: string): Promise<IChargeDetailRecord | undefined>
             create(cdr: IChargeDetailRecord): void
         }
+        sender?: {
+            getList(IPaginationParams?: IPaginationParams): Promise<IChargeDetailRecord[]>
+        }
     }
 }

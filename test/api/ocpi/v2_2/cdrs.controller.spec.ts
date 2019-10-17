@@ -4,7 +4,7 @@ import "mocha"
 import request from "supertest"
 import { startServer, stopServer } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
-import { testCdr, testRoles } from "../../../data/test-data"
+import { testCdr, testCdrList, testRoles } from "../../../data/test-data"
 import { startOCNClient } from "../../../mock/ocn-client"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
@@ -27,7 +27,7 @@ describe("OCPI Cdrs Controller", () => {
             roles: testRoles,
             modules: {
                 implementation: ModuleImplementation.CUSTOM,
-                sender: [],
+                sender: ["cdrs"],
                 receiver: ["cdrs"]
             },
             pluggableAPI: new PluggableAPIStub(),
@@ -94,6 +94,33 @@ describe("OCPI Cdrs Controller", () => {
                 })
         })
 
+    })
+
+    context("Sender interface", () => {
+
+        it("should return cdrs list", (done) => {
+
+            request(app)
+            .get("/ocpi/sender/2.2/cdrs")
+            .set("Authorization", "Token token-b")
+            .set("X-Request-ID", "123")
+            .set("X-Correlation-ID", "456")
+            .set("OCPI-From-Country-Code", "DE")
+            .set("OCPI-From-Party-Id", "MSP")
+            .set("OCPI-To-Country-Code", "DE")
+            .set("OCPI-To-Party-Id", "CPO")
+            .send()
+            .expect(200)
+            .end((err, result) => {
+                if (err) {
+                    return done(err)
+                }
+                console.log(result.body.data)
+                assert.equal(result.body.status_code, 1000)
+                assert.deepEqual(result.body.data, testCdrList)
+                done()
+            })
+        })
     })
 
 })

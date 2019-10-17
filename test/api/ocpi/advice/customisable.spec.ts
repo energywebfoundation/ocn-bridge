@@ -34,6 +34,11 @@ describe("Customisable Controller Advice", () => {
                         url: "http://localhost:8080/ocpi/sender/2.2/tariffs"
                     },
                     {
+                        identifier: "cdrs",
+                        role: "SENDER",
+                        url: "http://localhost:8080/ocpi/sender/2.2/cdrs"
+                    },
+                    {
                         identifier: "commands",
                         role: "RECEIVER",
                         url: "http://localhost:8080/ocpi/receiver/2.2/commands"
@@ -66,10 +71,15 @@ describe("Customisable Controller Advice", () => {
                         url: "http://cool.startup.io/ocpi/sender/2.2/tariffs"
                     },
                     {
+                        identifier: "cdrs",
+                        role: "SENDER",
+                        url: "http://cool.startup.io/ocpi/sender/2.2/cdrs"
+                    },
+                    {
                         identifier: "commands",
                         role: "RECEIVER",
                         url: "http://cool.startup.io/ocpi/receiver/2.2/commands"
-                    },
+                    }
                 ]
             },
             {

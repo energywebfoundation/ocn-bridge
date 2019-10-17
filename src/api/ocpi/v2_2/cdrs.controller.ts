@@ -3,6 +3,7 @@ import * as url from "url"
 import { IModules } from "../../../models/bridgeConfigurationOptions"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
+import { formatPaginationParams } from "../../../tools/tools"
 import { CustomisableController } from "../advice/customisable"
 
 export class CdrsController extends CustomisableController {
@@ -36,6 +37,18 @@ export class CdrsController extends CustomisableController {
                 res.set("Location", location).send(OcpiResponse.basicSuccess())
             })
 
+        }
+
+        if (this.isIncluded("cdrs", "SENDER", modules, pluggableAPI)) {
+
+            /**
+             * GET cdrs list
+             */
+            router.get("/sender/2.2/cdrs", async (req, res) => {
+                const params = formatPaginationParams(req.query)
+                const cdrs = await pluggableAPI.cdrs!.sender!.getList(params)
+                res.send(OcpiResponse.withData(cdrs))
+            })
         }
 
         return router;
