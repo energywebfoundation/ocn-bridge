@@ -53,6 +53,9 @@ export interface IPluggableAPI {
         receiver?: {
             update(session: ISession): void
         }
+        sender?: {
+            getList(IPaginationParams?: IPaginationParams): Promise<ISession[]>
+        }
     }
     cdrs?: {
         receiver?: {

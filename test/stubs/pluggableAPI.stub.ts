@@ -1,9 +1,10 @@
 import { IChargeDetailRecord } from "../../src/models/ocpi/cdrs";
 import { CommandResponseType, CommandResultType, IAsyncCommand, ICommandResult } from "../../src/models/ocpi/commands";
 import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
+import { ISession } from "../../src/models/ocpi/session";
 import { ITariff } from "../../src/models/ocpi/tariffs";
 import { IPluggableAPI } from "../../src/models/pluggableAPI";
-import { testCdr, testCdrList, testLocations, testTariffs } from "../data/test-data";
+import { testCdr, testCdrList, testLocations, testSessionList, testTariffs} from "../data/test-data";
 
 const asyncCommandNotSupported = {
     commandResponse: {
@@ -86,6 +87,11 @@ export class PluggableAPIStub implements IPluggableAPI {
         receiver: {
             update(): void {
                 return
+            }
+        },
+        sender: {
+            async getList(): Promise<ISession[]> {
+                return testSessionList
             }
         }
     }

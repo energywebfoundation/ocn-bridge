@@ -4,7 +4,7 @@ import "mocha"
 import request from "supertest"
 import { startServer, stopServer } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
-import { testRoles, testSession } from "../../../data/test-data"
+import { testRoles, testSession, testSessionList } from "../../../data/test-data"
 import { startOCNClient } from "../../../mock/ocn-client"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
@@ -27,7 +27,7 @@ describe("OCPI Sessions Controller", () => {
             roles: testRoles,
             modules: {
                 implementation: ModuleImplementation.CUSTOM,
-                sender: [],
+                sender: ["sessions"],
                 receiver: ["sessions"]
             },
             pluggableAPI: new PluggableAPIStub(),
@@ -58,6 +58,33 @@ describe("OCPI Sessions Controller", () => {
                 .set("OCPI-To-Country-Code", "DE")
                 .set("OCPI-To-Party-Id", "CPO")
                 .send(testSession)
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+
+                    assert.equal(result.body.status_code, 1000)
+                    done()
+                })
+        })
+
+    })
+
+    context("Sender interface", () => {
+
+        it("should return 1000 on Get session", (done) => {
+
+            request(app)
+                .get("/ocpi/sender/2.2/sessions")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send(testSessionList)
                 .expect(200)
                 .end((err, result) => {
                     if (err) {

@@ -269,3 +269,23 @@ export const testCdrList: IChargeDetailRecord[] = [
         last_updated: new Date().toISOString()
     }
 ]
+
+export const testSessionList: ISession[] = [{
+    country_code: "DE",
+    party_id: "CPO",
+    id: "1234",
+    start_date_time: new Date().toISOString(),
+    kwh: 1.5,
+    cdr_token: {
+        uid: "1111",
+        contract_id: "010203",
+        type: "AD_HOC_USER"
+    },
+    auth_method: "COMMAND",
+    location_id: "loc1",
+    evse_uid: "123",
+    connector_id: "1",
+    currency: "EUR",
+    status: "ACTIVE",
+    last_updated: new Date().toISOString()
+}]
