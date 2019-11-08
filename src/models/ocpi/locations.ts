@@ -117,14 +117,14 @@ export type connectorPowerType = "AC_1_PHASE" | "AC_3_PHASE" | "DC"
 
 export interface IEnergyMix {
     is_green_energy: boolean
-    energy_sources?: {
-        source: string
-        percentage: number
-    }
-    environ_impact?: {
-        category: string
-        amount: number
-    }
+    energy_sources?: Array<{
+        source: string;
+        percentage: number;
+    }>;
+    environ_impact?: Array<{
+        category: string;
+        amount: number;
+    }>;
     supplier_name?: string
     energy_product_name?: string
 }
