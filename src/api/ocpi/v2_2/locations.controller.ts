@@ -62,7 +62,7 @@ export class LocationsController extends CustomisableController {
                 const connector = await pluggableAPI.locations!.sender!.getConnector(
                     req.params.id,
                     req.params.evse,
-                    req.params.connectors
+                    req.params.connector
                 )
                 if (connector) {
                     res.send(OcpiResponse.withData(connector))
