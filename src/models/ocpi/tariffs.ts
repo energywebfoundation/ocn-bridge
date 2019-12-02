@@ -1,4 +1,6 @@
-import { IPrice } from "./session";
+import { IDisplayText } from "./common"
+import { IEnergyMix } from "./locations"
+import { IPrice } from "./session"
 
 export interface ITariff {
     country_code: string
@@ -6,10 +8,7 @@ export interface ITariff {
     id: string
     currency: string
     type?: string
-    tariff_alt_text?: Array<{
-        language: string
-        text: string
-    }>
+    tariff_alt_text?: IDisplayText[]
     tariff_alt_url?: string
     min_price?: IPrice
     max_price?: IPrice
@@ -45,18 +44,4 @@ export interface IPriceComponent {
     price: number
     vat?: number
     step_size: number
-}
-
-export interface IEnergyMix {
-    is_green_energy: boolean
-    energy_sources?: Array<{
-        source: string
-        percentage: number
-    }>
-    environ_impact?: Array<{
-        category: string
-        amount: number
-    }>
-    supplier_name?: string
-    energy_product_name?: string
 }
