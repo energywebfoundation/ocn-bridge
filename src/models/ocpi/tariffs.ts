@@ -13,7 +13,7 @@ export interface ITariff {
     tariff_alt_url?: string
     min_price?: IPrice
     max_price?: IPrice
-    elements: ITariffElement
+    elements: ITariffElement[]
     start_date_time?: string
     end_date_time?: string
     energy_mix?: IEnergyMix
@@ -60,4 +60,3 @@ export interface IEnergyMix {
     supplier_name?: string
     energy_product_name?: string
 }
-
