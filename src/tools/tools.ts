@@ -1,6 +1,7 @@
+import { Response } from "express"
 import { IncomingHttpHeaders } from "http"
 import * as uuid from "uuid"
-import { IHeaders, IPaginationParams } from "../models/ocpi/common"
+import { IHeaders, IPaginationParams, OcpiResponse } from "../models/ocpi/common"
 
 export const stripVersions = (url: string): string => {
     if (url.endsWith("/ocpi/versions")) {
@@ -43,4 +44,15 @@ export const formatPaginationParams = (params: any): IPaginationParams => {
         pagination.limit = parseInt(params.limit, 10)
     }
     return pagination
+}
+
+export const wrapApiMethod = async (instructions: () => Promise<Response>, res: Response): Promise<Response> => {
+    try {
+        return instructions()
+    } catch (err) {
+        if (err.status_code) {
+            return res.send(OcpiResponse.withMessage(err.status_code, err.status_message))
+        }
+        return res.send(OcpiResponse.withMessage(3000, err.message))
+    }
 }

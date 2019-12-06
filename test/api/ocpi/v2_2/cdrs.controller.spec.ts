@@ -115,7 +115,6 @@ describe("OCPI Cdrs Controller", () => {
                 if (err) {
                     return done(err)
                 }
-                console.log(result.body.data)
                 assert.equal(result.body.status_code, 1000)
                 assert.deepEqual(result.body.data, testCdrList)
                 done()

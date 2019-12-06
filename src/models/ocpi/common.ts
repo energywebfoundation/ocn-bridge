@@ -58,6 +58,12 @@ export class OcpiResponse implements IResponse<any> {
 
 }
 
+export class OcpiError extends Error {
+    constructor(public status_code: number, public status_message: string) {
+        super()
+    }
+}
+
 export interface IDisplayText {
     language: string
     text: string

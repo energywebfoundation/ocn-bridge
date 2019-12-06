@@ -13,7 +13,8 @@
         "semicolon": false,
         "no-console": false,
         "object-literal-key-quotes": false,
-        "no-string-literal": false
+        "no-string-literal": false,
+        "max-classes-per-file": false
     },
     "rulesDirectory": []
 }
