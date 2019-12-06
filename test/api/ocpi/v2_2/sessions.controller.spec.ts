@@ -76,7 +76,7 @@ describe("OCPI Sessions Controller", () => {
         it("should return 1000 on Get session", (done) => {
 
             request(app)
-                .get("/ocpi/sender/2.2/sessions")
+                .get("/ocpi/sender/2.2/sessions?date_from=2019-12-06T12:50:57.394Z")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
                 .set("X-Correlation-ID", "456")
