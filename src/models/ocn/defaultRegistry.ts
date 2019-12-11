@@ -14,11 +14,11 @@ export class DefaultRegistry implements IPluggableRegistry {
     }
 
     public async getNodeURL(countryCode: string, partyID: string): Promise<string> {
-        return this.readOnlyRegistry.clientURLOf(this.toHex(countryCode), this.toHex(partyID))
+        return this.readOnlyRegistry.nodeURLOf(this.toHex(countryCode), this.toHex(partyID))
     }
 
     public async getNodeAddress(countryCode: string, partyID: string): Promise<string> {
-        return this.readOnlyRegistry.clientAddressOf(this.toHex(countryCode), this.toHex(partyID))
+        return this.readOnlyRegistry.nodeAddressOf(this.toHex(countryCode), this.toHex(partyID))
     }
 
     public async register(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {

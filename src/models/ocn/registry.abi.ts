@@ -109,11 +109,11 @@ export const registryABI = [
                 "type": "bytes3"
             },
             {
-                "name": "clientURL",
+                "name": "nodeURL",
                 "type": "string"
             },
             {
-                "name": "clientAddress",
+                "name": "nodeAddress",
                 "type": "address"
             },
             {
@@ -238,10 +238,10 @@ export const registryABI = [
                 "type": "bytes3"
             }
         ],
-        "name": "clientURLOf",
+        "name": "nodeURLOf",
         "outputs": [
             {
-                "name": "clientURL",
+                "name": "nodeURL",
                 "type": "string"
             }
         ],
@@ -261,10 +261,10 @@ export const registryABI = [
                 "type": "bytes3"
             }
         ],
-        "name": "clientAddressOf",
+        "name": "nodeAddressOf",
         "outputs": [
             {
-                "name": "clientAddress",
+                "name": "nodeAddress",
                 "type": "address"
             }
         ],
