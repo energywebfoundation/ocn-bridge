@@ -4,7 +4,7 @@ export enum registryListing {
     REGISTER_REQUIRED
 }
 
-export interface IClientInfo {
+export interface INodeInfo {
     url: string
     address: string
 }

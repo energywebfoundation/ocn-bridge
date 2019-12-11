@@ -35,8 +35,8 @@ startBridge({
     // note the bridge binds to localhost; use a reverse proxy like Nginx with SSL
     publicBridgeURL: "http://bridge.cpo.net",
 
-    // publicly available URL of the OCN client to connect to                               
-    ocnClientURL: "http://client.ocn.net",          
+    // publicly available URL of the OCN node to connect to                               
+    ocnNodeURL: "http://node.ocn.net",          
     
     // set the bridge to use OCPI credentials roles
     roles: [                                  
@@ -102,16 +102,16 @@ The registration process is two-fold and will be triggered automatically as long
 `dryRun` is not set to `true`. Parties are taken from the `roles` attribute used in starting the bridge. 
 
 Firstly, the OCN Bridge will check the status of the OCPI party in the OCN Registry. If they are unlisted, or 
-they are listed under a different OCN client as the one provided in the configuration, the OCN Bridge will
+they are listed under a different OCN node as the one provided in the configuration, the OCN Bridge will
 attempt to register them. To do this, it is necessary to at least set the environment variable, `SIGNER_KEY`, 
 describing the private key to use as the signer. If the signer is to be different from the _spender_ (the 
 wallet paying for the transaction), then it is possible to also set a `SPENDER_KEY`, otherwise the two will 
 be the same. For example:
 
-Secondly, the OCN Bridge will check whether there is already a connection to an OCN client. If not, a POST
-`credentials` request will be sent to the desired OCN client. To do this, another environment variable is
-needed. The `TOKEN_A` environment variable is obtained from the OCN client and is needed to complete the
-OCPI connection with it. Ask the administrator of the OCN client for it if this is missing.
+Secondly, the OCN Bridge will check whether there is already a connection to an OCN node. If not, a POST
+`credentials` request will be sent to the desired OCN node. To do this, another environment variable is
+needed. The `TOKEN_A` environment variable is obtained from the OCN node and is needed to complete the
+OCPI connection with it. Ask the administrator of the OCN node for it if this is missing.
 
 In full, a project that depends on the OCN Bridge can therefore be started like so:
 

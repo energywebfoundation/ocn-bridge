@@ -59,7 +59,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
 
                 await registrationService.register(
                     options.publicBridgeURL,
-                    stripVersions(options.ocnClientURL),
+                    stripVersions(options.ocnNodeURL),
                     options.roles
                 )
             }

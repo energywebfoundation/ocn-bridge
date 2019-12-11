@@ -3,7 +3,7 @@ import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableDB } from "../../../models/pluggableDB"
 
 /**
- * Express middleware to check for OCN client's TOKEN_C on incoming requests
+ * Express middleware to check for OCN node's TOKEN_C on incoming requests
  */
 export const isAuthorized = (pluggableDB: IPluggableDB) => {
     return async (req: Request, res: Response, next: NextFunction) => {

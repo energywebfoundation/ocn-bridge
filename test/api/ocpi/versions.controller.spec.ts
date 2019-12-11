@@ -20,7 +20,7 @@ describe("OCPI Versions Controller", () => {
 
         app = await startServer({
             publicBridgeURL: "http://localhost:3000/",
-            ocnClientURL: "http::/localhost:3001",
+            ocnNodeURL: "http::/localhost:3001",
             roles: testRoles,
             modules: { implementation: ModuleImplementation.ALL },
             pluggableAPI: new PluggableAPIStub(),

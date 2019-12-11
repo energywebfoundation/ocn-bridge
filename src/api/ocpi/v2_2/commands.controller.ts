@@ -153,7 +153,7 @@ export class CommandsController extends CustomisableController {
         if (this.responseWasAccepted(response) && response.commandResult) {
             // await the async response
             const asyncResult = await response.commandResult()
-            // fetch token (TOKEN_C) for OCN client authorization
+            // fetch token (TOKEN_C) for OCN node authorization
             const tokenC = await pluggableDB.getTokenC()
             // fire and forget request
             await fetch(responseURL, {

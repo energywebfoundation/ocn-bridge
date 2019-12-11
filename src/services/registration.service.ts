@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import * as url from "url";
 import * as uuid from "uuid";
 import { IPluggableRegistry } from "../models/ocn/pluggableRegistry";
-import { IClientInfo, registryListing } from "../models/ocn/registry";
+import { INodeInfo, registryListing } from "../models/ocn/registry";
 import { IResponse } from "../models/ocpi/common";
 import { ICredentials, IRole } from "../models/ocpi/credentials";
 import { IVersionDetail, IVersions } from "../models/ocpi/versions";
@@ -13,65 +13,65 @@ export class RegistrationService {
 
     constructor(private registry: IPluggableRegistry, private db: IPluggableDB) { }
 
-    public async register(publicIP: string, clientURL: string, roles: IRole[]): Promise<void> {
-        const clientInfo = await this.getClientInfo(clientURL)
+    public async register(publicIP: string, nodeURL: string, roles: IRole[]): Promise<void> {
+        const nodeInfo = await this.getNodeInfo(nodeURL)
         for (const role of roles) {
-            const listing = await this.isListedInRegistry(role.country_code, role.party_id, clientInfo)
+            const listing = await this.isListedInRegistry(role.country_code, role.party_id, nodeInfo)
             switch (listing) {
                 case registryListing.OK:
                     break
                 case registryListing.REGISTER_REQUIRED:
                     const regKeys = this.getKeys("register")
-                    await this.listInRegistry(role.country_code, role.party_id, clientInfo.url, clientInfo.address, regKeys.signer, regKeys.spender)
+                    await this.listInRegistry(role.country_code, role.party_id, nodeInfo.url, nodeInfo.address, regKeys.signer, regKeys.spender)
                     break
                 case registryListing.UPDATE_REQUIRED:
                     const updateKeys = this.getKeys("update")
-                    await this.updateInRegistry(role.country_code, role.party_id, clientInfo.url, clientInfo.address, updateKeys.signer, updateKeys.spender)
+                    await this.updateInRegistry(role.country_code, role.party_id, nodeInfo.url, nodeInfo.address, updateKeys.signer, updateKeys.spender)
                     break
             }
         }
-        const isConnected = await this.isConnectedToClient()
+        const isConnected = await this.isConnectedToNode()
         if (isConnected) {
             return
         }
         if (!process.env.TOKEN_A) {
-            throw Error("need TOKEN_A to complete registration process with OCN client")
+            throw Error("need TOKEN_A to complete registration process with OCN node")
         }
-        await this.getClientEndpoints(url.resolve(clientURL, "/ocpi/versions"), process.env.TOKEN_A)
-        await this.connectToClient({
+        await this.getNodeEndpoints(url.resolve(nodeURL, "/ocpi/versions"), process.env.TOKEN_A)
+        await this.connectToNode({
             token: uuid.v4(),
             url: url.resolve(publicIP, "/ocpi/versions"),
             roles
         }, process.env.TOKEN_A)
     }
 
-    public async getClientInfo(clientURL: string): Promise<IClientInfo> {
-        const res = await fetch(url.resolve(clientURL, "/ocn/registry/client-info"))
+    public async getNodeInfo(nodeURL: string): Promise<INodeInfo> {
+        const res = await fetch(url.resolve(nodeURL, "/ocn/registry/node-info"))
         return res.json()
     }
 
-    public async isListedInRegistry(countryCode: string, partyID: string, expectedClientInfo: IClientInfo): Promise<registryListing> {
-        const clientURL = await this.registry.getClientURL(countryCode, partyID)
-        const clientAddress = await this.registry.getClientAddress(countryCode, partyID)
+    public async isListedInRegistry(countryCode: string, partyID: string, expectedNodeInfo: INodeInfo): Promise<registryListing> {
+        const nodeURL = await this.registry.getNodeURL(countryCode, partyID)
+        const nodeAddress = await this.registry.getNodeAddress(countryCode, partyID)
 
-        if ((clientURL === expectedClientInfo.url) && (utils.getAddress(clientAddress) === utils.getAddress(expectedClientInfo.address))) {
+        if ((nodeURL === expectedNodeInfo.url) && (utils.getAddress(nodeAddress) === utils.getAddress(expectedNodeInfo.address))) {
             return registryListing.OK
-        } else if ((clientURL === "") && (clientAddress === "0x0000000000000000000000000000000000000000")) {
+        } else if ((nodeURL === "") && (nodeAddress === "0x0000000000000000000000000000000000000000")) {
             return registryListing.REGISTER_REQUIRED
         } else {
             return registryListing.UPDATE_REQUIRED
         }
     }
 
-    public async listInRegistry(countryCode: string, partyID: string, clientURL: string, clientAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
-        return this.registry.register(countryCode, partyID, clientURL, clientAddress, signerKey, spenderKey)
+    public async listInRegistry(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
+        return this.registry.register(countryCode, partyID, nodeURL, nodeAddress, signerKey, spenderKey)
     }
 
-    public async updateInRegistry(countryCode: string, partyID: string, clientURL: string, clientAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
-        return this.registry.update(countryCode, partyID, clientURL, clientAddress, signerKey, spenderKey)
+    public async updateInRegistry(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
+        return this.registry.update(countryCode, partyID, nodeURL, nodeAddress, signerKey, spenderKey)
     }
 
-    public async isConnectedToClient(): Promise<boolean> {
+    public async isConnectedToNode(): Promise<boolean> {
         const tokenC = await this.db.getTokenC()
         if (tokenC === "") {
             return false
@@ -86,29 +86,29 @@ export class RegistrationService {
         return resBody.status_code === 1000
     }
 
-    public async getClientEndpoints(clientVersionsURL: string, tokenA: string) {
+    public async getNodeEndpoints(nodeVersionsURL: string, tokenA: string) {
         const headers = {
             "Authorization": `Token ${tokenA}`
         }
-        const availableVersionsRes = await fetch(clientVersionsURL, { headers })
+        const availableVersionsRes = await fetch(nodeVersionsURL, { headers })
         const availableVersions: IResponse<IVersions> = await availableVersionsRes.json()
         if (availableVersions.data) {
             const foundVersion = availableVersions.data.versions.find((v) => v.version === "2.2")
             if (!foundVersion) {
-                throw Error("Could not find 2.2 in OCN client's available OCPI versions")
+                throw Error("Could not find 2.2 in OCN node's available OCPI versions")
             }
             const versionDetailRes = await fetch(foundVersion.url, { headers })
             const versionDetail: IResponse<IVersionDetail> = await versionDetailRes.json()
             if (!versionDetail.data) {
-                throw Error("Unable to request OCN client's 2.2 version details")
+                throw Error("Unable to request OCN node's 2.2 version details")
             }
             await this.db.saveEndpoints(versionDetail.data)
         } else {
-            throw Error("Unable to request OCN client's OCPI versions")
+            throw Error("Unable to request OCN node's OCPI versions")
         }
     }
 
-    public async connectToClient(credentials: ICredentials, tokenA: string) {
+    public async connectToNode(credentials: ICredentials, tokenA: string) {
         await this.db.setTokenB(credentials.token)
         const credentialsEndpoint = await this.db.getEndpoint("credentials", "SENDER")
         const credentialsRes = await fetch(credentialsEndpoint, {
@@ -119,11 +119,11 @@ export class RegistrationService {
             },
             body: JSON.stringify(credentials)
         })
-        const clientCredentials: IResponse<ICredentials> = await credentialsRes.json()
-        if (!clientCredentials.data) {
-            throw Error("Did not receive CREDENTIALS_TOKEN_C from OCN client")
+        const nodeCredentials: IResponse<ICredentials> = await credentialsRes.json()
+        if (!nodeCredentials.data) {
+            throw Error("Did not receive CREDENTIALS_TOKEN_C from OCN node")
         }
-        await this.db.setTokenC(clientCredentials.data.token)
+        await this.db.setTokenC(nodeCredentials.data.token)
     }
 
     private getKeys(mode: string): { signer: string, spender: string } {

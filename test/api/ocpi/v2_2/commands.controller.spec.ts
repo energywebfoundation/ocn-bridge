@@ -7,7 +7,7 @@ import request from "supertest"
 import { startServer, stopServer } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testToken } from "../../../data/test-data"
-import { startOCNClient } from "../../../mock/ocn-client"
+import { startNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
@@ -18,7 +18,7 @@ describe("OCPI Commands Controller", () => {
 
     let app: Server
 
-    let ocnClient: Server
+    let ocnNode: Server
 
     beforeEach(async () => {
         const db = new PluggableDBStub()
@@ -29,7 +29,7 @@ describe("OCPI Commands Controller", () => {
 
         app = await startServer({
             publicBridgeURL: "http://localhost:3000",
-            ocnClientURL: "http://localhost:3001",
+            ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
             modules: {
                 implementation: ModuleImplementation.CUSTOM,
@@ -42,12 +42,12 @@ describe("OCPI Commands Controller", () => {
             dryRun: true
         })
 
-        ocnClient = await startOCNClient(3001, events)
+        ocnNode = await startNode(3001, events)
     })
 
     afterEach(async () => {
         await stopServer(app)
-        await stopServer(ocnClient)
+        await stopServer(ocnNode)
     })
 
     context("Sender interface", () => {

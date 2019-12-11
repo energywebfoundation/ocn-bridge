@@ -16,7 +16,7 @@ describe("API context", () => {
     beforeEach(async () => {
         app = await startServer({
             publicBridgeURL: "http://localhost:3000",
-            ocnClientURL: "http://localhost:3001",
+            ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
             modules: {
                 implementation: ModuleImplementation.ALL

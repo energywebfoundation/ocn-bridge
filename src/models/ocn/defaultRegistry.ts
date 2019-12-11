@@ -13,36 +13,36 @@ export class DefaultRegistry implements IPluggableRegistry {
         this.readOnlyRegistry = new ethers.Contract(this.address, registryABI, this.provider)
     }
 
-    public async getClientURL(countryCode: string, partyID: string): Promise<string> {
+    public async getNodeURL(countryCode: string, partyID: string): Promise<string> {
         return this.readOnlyRegistry.clientURLOf(this.toHex(countryCode), this.toHex(partyID))
     }
 
-    public async getClientAddress(countryCode: string, partyID: string): Promise<string> {
+    public async getNodeAddress(countryCode: string, partyID: string): Promise<string> {
         return this.readOnlyRegistry.clientAddressOf(this.toHex(countryCode), this.toHex(partyID))
     }
 
-    public async register(countryCode: string, partyID: string, clientURL: string, clientAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
+    public async register(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
         const signer = new ethers.Wallet(signerKey)
         let spender = new ethers.Wallet(spenderKey)
         spender = spender.connect(this.provider)
         const writableRegistry = new ethers.Contract(this.address, registryABI, spender)
         const countryHex = this.toHex(countryCode)
         const partyIdHex = this.toHex(partyID)
-        const sig = await this.sign(countryHex, partyIdHex, clientURL, clientAddress, signer)
-        const tx = await writableRegistry.register(countryHex, partyIdHex, clientURL, clientAddress, sig.v, sig.r, sig.s)
+        const sig = await this.sign(countryHex, partyIdHex, nodeURL, nodeAddress, signer)
+        const tx = await writableRegistry.register(countryHex, partyIdHex, nodeURL, nodeAddress, sig.v, sig.r, sig.s)
         await tx.wait()
         return true
     }
 
-    public async update(countryCode: string, partyID: string, clientURL: string, clientAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
+    public async update(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
         const signer = new ethers.Wallet(signerKey)
         let spender = new ethers.Wallet(spenderKey)
         spender = spender.connect(this.provider)
         const writableRegistry = new ethers.Contract(this.address, registryABI, spender)
         const countryHex = this.toHex(countryCode)
         const partyIdHex = this.toHex(partyID)
-        const sig = await this.sign(countryHex, partyIdHex, clientURL, clientAddress, signer)
-        const tx = await writableRegistry.updateClientInfo(countryHex, partyIdHex, clientURL, clientAddress, sig.v, sig.r, sig.s)
+        const sig = await this.sign(countryHex, partyIdHex, nodeURL, nodeAddress, signer)
+        const tx = await writableRegistry.updateClientInfo(countryHex, partyIdHex, nodeURL, nodeAddress, sig.v, sig.r, sig.s)
         await tx.wait()
         return true
     }
@@ -54,8 +54,8 @@ export class DefaultRegistry implements IPluggableRegistry {
         return "0x" + Buffer.from(str).toString("hex")
     }
 
-    private async sign(countryCode: string, partyID: string, clientURL: string, clientAddress: string, wallet: ethers.Wallet): Promise<Signature> {
-        const msg = `${countryCode}${partyID}${clientURL}${clientAddress}`
+    private async sign(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, wallet: ethers.Wallet): Promise<Signature> {
+        const msg = `${countryCode}${partyID}${nodeURL}${nodeAddress}`
         const msgHash = ethers.utils.keccak256(Buffer.from(msg))
         const msgHashBytes = ethers.utils.arrayify(msgHash)
         const flatSig = await wallet.signMessage(msgHashBytes)

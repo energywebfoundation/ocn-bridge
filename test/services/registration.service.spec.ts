@@ -8,7 +8,7 @@ import { registryListing } from "../../src/models/ocn/registry"
 import { IPluggableDB } from "../../src/models/pluggableDB"
 import { RegistrationService } from "../../src/services/registration.service"
 import { testCredentials } from "../data/test-data"
-import { startOCNClient } from "../mock/ocn-client"
+import { startNode } from "../mock/ocn-node"
 import { PluggableDBStub } from "../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../stubs/pluggableRegistry.stub"
 
@@ -32,10 +32,10 @@ describe("Registration Service", () => {
         registrationService = new RegistrationService(registry, db)
     })
 
-    it("getClientInfo", async () => {
-        const ocnClient = await startOCNClient(3001)
+    it("getNodeInfo", async () => {
+        const ocnNode = await startNode(3001)
 
-        const got = await registrationService.getClientInfo("http://localhost:3001")
+        const got = await registrationService.getNodeInfo("http://localhost:3001")
         const want = {
             url: "http://localhost:3001",
             address: "0x63937aBd9308ad672Df9A2a1dcb1b38961f29C11"
@@ -43,7 +43,7 @@ describe("Registration Service", () => {
 
         assert.deepEqual(got, want)
 
-        await stopServer(ocnClient)
+        await stopServer(ocnNode)
     })
 
     context("isListedInRegistry", () => {
@@ -98,7 +98,7 @@ describe("Registration Service", () => {
         assert.equal(got, true)
     })
 
-    it("isConnectedToClient", async () => {
+    it("isConnectedToNode", async () => {
         const modifiedDB = new PluggableDBStub()
         modifiedDB.saveEndpoints({
             version: "2.2",
@@ -112,24 +112,24 @@ describe("Registration Service", () => {
 
         const modifiedRegistrationService = new RegistrationService(registry, modifiedDB)
 
-        const ocnClient = await startOCNClient(3001)
+        const ocnNode = await startNode(3001)
 
-        const got = await modifiedRegistrationService.isConnectedToClient()
+        const got = await modifiedRegistrationService.isConnectedToNode()
 
-        await stopServer(ocnClient)
+        await stopServer(ocnNode)
 
         assert.equal(got, true)
     })
 
-    it("getClientEndpoints", async () => {
-        const ocnClient = await startOCNClient(3001)
-        await registrationService.getClientEndpoints("http://localhost:3001/ocpi/versions", "token-a")
-        await stopServer(ocnClient)
+    it("getNodeEndpoints", async () => {
+        const ocnNode = await startNode(3001)
+        await registrationService.getNodeEndpoints("http://localhost:3001/ocpi/versions", "token-a")
+        await stopServer(ocnNode)
         const got = await db.getEndpoint("commands", "SENDER")
         assert.equal(got, "http://localhost:3001/ocpi/sender/2.2/commands")
     })
 
-    it("connectToClient", async () => {
+    it("connectToNode", async () => {
 
         const modifiedDB = new PluggableDBStub()
         modifiedDB.saveEndpoints({
@@ -147,7 +147,7 @@ describe("Registration Service", () => {
 
         return new Promise(async (resolve, reject) => {
 
-            const ocnClient = await startOCNClient(3001, events)
+            const ocnNode = await startNode(3001, events)
 
             events.once("CREDENTIALS_POST", async (body) => {
                 if (body.token !== "token-b") {
@@ -155,9 +155,9 @@ describe("Registration Service", () => {
                 }
             })
 
-            await modifiedRegistrationService.connectToClient(testCredentials, "token-a")
+            await modifiedRegistrationService.connectToNode(testCredentials, "token-a")
 
-            await stopServer(ocnClient)
+            await stopServer(ocnNode)
 
             const tokenB = await modifiedDB.getTokenB()
             const tokenC = await modifiedDB.getTokenC()

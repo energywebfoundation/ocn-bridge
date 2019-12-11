@@ -2,13 +2,13 @@ import { IPluggableRegistry } from "../../src/models/ocn/pluggableRegistry";
 
 export class PluggableRegistryStub implements IPluggableRegistry {
 
-    constructor(private clientURL: string = "", private clientAddress: string = "0x0000000000000000000000000000000000000000") {}
+    constructor(private nodeURL: string = "", private nodeAddress: string = "0x0000000000000000000000000000000000000000") {}
 
-    public async getClientURL(): Promise<string> {
-        return this.clientURL
+    public async getNodeURL(): Promise<string> {
+        return this.nodeURL
     }
-    public async getClientAddress(): Promise<string> {
-        return this.clientAddress
+    public async getNodeAddress(): Promise<string> {
+        return this.nodeAddress
     }
 
     public async register(): Promise<boolean> {
