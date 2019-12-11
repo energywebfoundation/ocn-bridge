@@ -42,7 +42,7 @@ export class DefaultRegistry implements IPluggableRegistry {
         const countryHex = this.toHex(countryCode)
         const partyIdHex = this.toHex(partyID)
         const sig = await this.sign(countryHex, partyIdHex, nodeURL, nodeAddress, signer)
-        const tx = await writableRegistry.updateClientInfo(countryHex, partyIdHex, nodeURL, nodeAddress, sig.v, sig.r, sig.s)
+        const tx = await writableRegistry.updateNodeInfo(countryHex, partyIdHex, nodeURL, nodeAddress, sig.v, sig.r, sig.s)
         await tx.wait()
         return true
     }

@@ -83,11 +83,11 @@ export const registryABI = [
                 "type": "address"
             },
             {
-                "name": "newClientURL",
+                "name": "newNodeURL",
                 "type": "string"
             },
             {
-                "name": "newClientAddress",
+                "name": "newNodeAddress",
                 "type": "address"
             }
         ],
@@ -177,11 +177,11 @@ export const registryABI = [
                 "type": "bytes3"
             },
             {
-                "name": "newClientURL",
+                "name": "newNodeURL",
                 "type": "string"
             },
             {
-                "name": "newClientAddress",
+                "name": "newNodeAddress",
                 "type": "address"
             },
             {
@@ -197,7 +197,7 @@ export const registryABI = [
                 "type": "bytes32"
             }
         ],
-        "name": "updateClientInfo",
+        "name": "updateNodeInfo",
         "outputs": [],
         "payable": false,
         "stateMutability": "nonpayable",
