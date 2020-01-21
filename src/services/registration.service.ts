@@ -93,7 +93,7 @@ export class RegistrationService {
         const availableVersionsRes = await fetch(nodeVersionsURL, { headers })
         const availableVersions: IResponse<IVersions> = await availableVersionsRes.json()
         if (availableVersions.data) {
-            const foundVersion = availableVersions.data.versions.find((v) => v.version === "2.2")
+            const foundVersion = availableVersions.data.find((v) => v.version === "2.2")
             if (!foundVersion) {
                 throw Error("Could not find 2.2 in OCN node's available OCPI versions")
             }

@@ -43,14 +43,12 @@ export const startNode = async (port: number, events: EventEmitter = new EventEm
     })
 
     node.get("/ocpi/versions", authorizationMiddleware("token-a"), async (_, res) => {
-        res.send(OcpiResponse.withData({
-            versions: [
-                {
-                    version: "2.2",
-                    url: "http://localhost:3001/ocpi/versions/2.2"
-                }
-            ]
-        }))
+        res.send(OcpiResponse.withData([
+            {
+                version: "2.2",
+                url: "http://localhost:3001/ocpi/versions/2.2"
+            }]
+        ))
     })
 
     node.get("/ocpi/versions/2.2", authorizationMiddleware("token-a"), async (_, res) => {

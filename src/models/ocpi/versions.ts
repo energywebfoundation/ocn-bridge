@@ -1,9 +1,9 @@
-export interface IVersions {
-    versions: Array<{
-        version: string,
-        url: string
-    }>
+interface IVersion {
+    version: string,
+    url: string
 }
+
+export interface IVersions extends Array<IVersion> {}
 
 export interface IVersionDetail {
     version: string,

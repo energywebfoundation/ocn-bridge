@@ -4,7 +4,8 @@ export interface ILocation {
     country_code: string
     party_id: string
     id: string
-    type: "ON_STREET" | "PARKING_GARAGE" | "UNDERGROUND_GARAGE" | "PARKING_LOT" | "OTHER" | "UNKNOWN"
+    publish: boolean
+    publish_allowed_to?: IPublishTokenType[]
     name?: string
     address: string
     city: string
@@ -13,6 +14,7 @@ export interface ILocation {
     country: string
     coordinates: IGeoLocation
     related_locations?: IAdditionalGeoLocation[]
+    parking_type?: parkingType
     evses?: IEvse[]
     directions?: IDisplayText[]
     operator?: IBusinessDetails
@@ -47,7 +49,7 @@ export interface IEvse {
         period_end: string
         status: evseStatus
     }>
-    capabilities?: string[]
+    capabilities?: capabilities[]
     connectors: IConnector[]
     floor_level?: string
     coordinates?: IGeoLocation
@@ -145,3 +147,28 @@ export interface IHours {
         period_end: string
     }>
 }
+
+export interface IPublishTokenType {
+    uid?: string,
+    type?: tokenType,
+    visual_number?: string,
+    issuer?: string,
+    group_id?: string
+}
+
+export type tokenType = "AD_HOC_USER" | "APP_USER" | "OTHER" | "RFID"
+export type parkingType = "ALONG_MOTORWAY" | "PARKING_GARAGE" | "PARKING_LOT" | "ON_DRIVEWAY" | "ON_STREET" | "UNDERGROUND_GARAGE"
+
+export type capabilities =
+    "CHARGING_PROFILE_CAPABLE" |
+    "CHARGING_PREFERENCES_CAPABLE" |
+    "CHIP_CARD_SUPPORT" |
+    "CONTACTLESS_CARD_SUPPORT" |
+    "CREDIT_CARD_PAYABLE" |
+    "DEBIT_CARD_PAYABLE" |
+    "PED_TERMINAL" |
+    "REMOTE_START_STOP_CAPABLE" |
+    "RESERVABLE" |
+    "RFID_READER" |
+    "TOKEN_GROUP_CAPABLE" |
+    "UNLOCK_CAPABLE"

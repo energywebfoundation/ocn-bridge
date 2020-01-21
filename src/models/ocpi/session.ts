@@ -21,7 +21,7 @@ export interface ISession {
     last_updated: string
 }
 
-export type sessionStatus = "ACTIVE" | "COMPLETED" | "INVALID" | "PENDING"
+export type sessionStatus = "ACTIVE" | "COMPLETED" | "INVALID" | "PENDING" | "RESERVATION"
 
 export type authMethod = "AUTH_REQUEST" | "COMMAND" | "WHITELIST"
 
