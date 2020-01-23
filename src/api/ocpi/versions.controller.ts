@@ -12,14 +12,12 @@ export class VersionsController extends CustomisableController {
         const endpoints = this.getNeededEndpoints(publicIP, modules)
 
         router.get("/versions", async (_, res) => {
-            res.send(OcpiResponse.withData({
-                versions: [
-                    {
-                        version: "2.2",
-                        url: url.resolve(publicIP, "/ocpi/versions/2.2")
-                    }
-                ]
-            }))
+            res.send(OcpiResponse.withData([
+                {
+                    version: "2.2",
+                    url: url.resolve(publicIP, "/ocpi/versions/2.2")
+                }
+            ]))
         })
 
         router.get("/versions/2.2", async (_, res) => {
