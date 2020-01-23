@@ -45,14 +45,12 @@ describe("OCPI Versions Controller", () => {
                 }
 
                 assert.equal(result.body.status_code, 1000)
-                assert.deepEqual(result.body.data, {
-                    versions: [
-                        {
-                            version: "2.2",
-                            url: "http://localhost:3000/ocpi/versions/2.2"
-                        }
-                    ]
-                })
+                assert.deepEqual(result.body.data, [
+                    {
+                        version: "2.2",
+                        url: "http://localhost:3000/ocpi/versions/2.2"
+                    }
+                ])
 
                 done()
             })
