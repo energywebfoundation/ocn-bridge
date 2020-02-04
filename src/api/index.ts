@@ -3,7 +3,6 @@ import express, { Router } from "express"
 import { Server } from "http"
 import morgan from "morgan"
 import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
-import { PushService } from "../services/push.service"
 import { RegistrationService } from "../services/registration.service"
 import { stripVersions } from "../tools/tools"
 import { isAuthorized } from "./ocpi/middleware/middleware"
@@ -38,13 +37,11 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
 
     app.use(homeController)
 
-    const pushService = new PushService(options.pluggableDB)
-
     app.use(
         "/ocpi/",
         isAuthorized(options.pluggableDB),
         VersionsController.getRoutes(options.publicBridgeURL, options.modules),
-        CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules, pushService),
+        CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules),
         LocationsController.getRoutes(options.pluggableAPI, options.modules),
         TariffsController.getRoutes(options.pluggableAPI, options.modules),
         SessionsController.getRoutes(options.pluggableAPI, options.modules),
