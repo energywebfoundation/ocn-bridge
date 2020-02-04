@@ -77,7 +77,7 @@ export class CommandsController extends CustomisableController {
                     startRequest,
                     {
                         country_code: req.headers["ocpi-from-country-code"] as string,
-                        party_id: req.headers["ocpi-to-party-id"] as string
+                        party_id: req.headers["ocpi-from-party-id"] as string
                     }
                 )
                 // send the initial response
@@ -93,7 +93,7 @@ export class CommandsController extends CustomisableController {
                 // await the initial repsonse to stop a session
                 const response = await pluggableAPI.commands!.receiver!.stopSession(req.body.session_id, {
                     country_code: req.headers["ocpi-from-country-code"] as string,
-                    party_id: req.headers["ocpi-to-party-id"] as string
+                    party_id: req.headers["ocpi-from-party-id"] as string
                 })
                 // send the inital response
                 res.send(OcpiResponse.withData(response.commandResponse))
