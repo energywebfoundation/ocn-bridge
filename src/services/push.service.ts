@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import * as uuid from "uuid";
 import { IChargeDetailRecord } from "../models/ocpi/cdrs";
 import { ISession } from "../models/ocpi/session";
