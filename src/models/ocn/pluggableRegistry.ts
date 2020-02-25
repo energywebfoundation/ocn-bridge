@@ -13,9 +13,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
+
+import { Role } from "@shareandcharge/ocn-registry/dist/types";
+
 export interface IPluggableRegistry {
-    getNodeURL(countryCode: string, partyID: string): Promise<string>
-    getNodeAddress(countryCode: string, partyID: string): Promise<string>
-    register(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean>
-    update(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean>
+    getNode(countryCode: string, partyID: string): Promise<{ operator: string, url: string }>
+    setParty(countryCode: string, partyID: string, roles: Role[], operator: string): Promise<boolean>
 }

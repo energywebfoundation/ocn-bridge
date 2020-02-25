@@ -13,7 +13,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-import { utils } from "ethers"
+
+import { Role } from "@shareandcharge/ocn-registry/dist/types";
+import { utils } from "ethers";
 import fetch from "node-fetch";
 import * as url from "url";
 import * as uuid from "uuid";
@@ -32,17 +34,8 @@ export class RegistrationService {
         const nodeInfo = await this.getNodeInfo(nodeURL)
         for (const role of roles) {
             const listing = await this.isListedInRegistry(role.country_code, role.party_id, nodeInfo)
-            switch (listing) {
-                case registryListing.OK:
-                    break
-                case registryListing.REGISTER_REQUIRED:
-                    const regKeys = this.getKeys("register")
-                    await this.listInRegistry(role.country_code, role.party_id, nodeInfo.url, nodeInfo.address, regKeys.signer, regKeys.spender)
-                    break
-                case registryListing.UPDATE_REQUIRED:
-                    const updateKeys = this.getKeys("update")
-                    await this.updateInRegistry(role.country_code, role.party_id, nodeInfo.url, nodeInfo.address, updateKeys.signer, updateKeys.spender)
-                    break
+            if (listing !== registryListing.OK) {
+                await this.registry.setParty(role.country_code, role.party_id, [this.toRole(role.role)], nodeInfo.address)
             }
         }
         const isConnected = await this.isConnectedToNode()
@@ -66,24 +59,15 @@ export class RegistrationService {
     }
 
     public async isListedInRegistry(countryCode: string, partyID: string, expectedNodeInfo: INodeInfo): Promise<registryListing> {
-        const nodeURL = await this.registry.getNodeURL(countryCode, partyID)
-        const nodeAddress = await this.registry.getNodeAddress(countryCode, partyID)
+        const node = await this.registry.getNode(countryCode, partyID)
 
-        if ((nodeURL === expectedNodeInfo.url) && (utils.getAddress(nodeAddress) === utils.getAddress(expectedNodeInfo.address))) {
+        if ((node.url === expectedNodeInfo.url) && (utils.getAddress(node.operator) === utils.getAddress(expectedNodeInfo.address))) {
             return registryListing.OK
-        } else if ((nodeURL === "") && (nodeAddress === "0x0000000000000000000000000000000000000000")) {
+        } else if ((node.url === "") && (node.operator === "0x0000000000000000000000000000000000000000")) {
             return registryListing.REGISTER_REQUIRED
         } else {
             return registryListing.UPDATE_REQUIRED
         }
-    }
-
-    public async listInRegistry(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
-        return this.registry.register(countryCode, partyID, nodeURL, nodeAddress, signerKey, spenderKey)
-    }
-
-    public async updateInRegistry(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
-        return this.registry.update(countryCode, partyID, nodeURL, nodeAddress, signerKey, spenderKey)
     }
 
     public async isConnectedToNode(): Promise<boolean> {
@@ -141,21 +125,17 @@ export class RegistrationService {
         await this.db.setTokenC(nodeCredentials.data.token)
     }
 
-    private getKeys(mode: string): { signer: string, spender: string } {
-        let signer: string
-        let spender: string
-
-        if (!process.env.SIGNER_KEY) {
-            throw Error(`No SIGNER_KEY provided. Unable to ${mode} listing in OCN Registry`)
+    private toRole(str: string): Role {
+        const roles: {[key: string]: number} = {
+            "CPO": 0,
+            "EMSP": 1,
+            "HUB": 2,
+            "NAP": 3,
+            "NSP": 4,
+            "OTHER": 5,
+            "SCSP": 6
         }
-        signer = process.env.SIGNER_KEY
-
-        spender = process.env.SPENDER_KEY ? process.env.SPENDER_KEY : signer
-
-        return {
-            signer,
-            spender
-        }
+        return roles[str] || 5
     }
 
 }

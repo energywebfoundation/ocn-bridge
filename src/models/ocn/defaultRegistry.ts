@@ -13,69 +13,39 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-import { ethers } from "ethers";
-import { Signature } from "ethers/utils";
+
+import { Registry } from "@shareandcharge/ocn-registry"
+import { Role } from "@shareandcharge/ocn-registry/dist/types";
 import { IPluggableRegistry } from "./pluggableRegistry";
-import { registryABI } from "./registry.abi";
 
 export class DefaultRegistry implements IPluggableRegistry {
 
-    private provider: ethers.providers.JsonRpcProvider
-    private readOnlyRegistry: ethers.Contract
+    private signer: string
+    private spender?: string
+    private registry: Registry
 
-    constructor(private jsonRpcProvider: string, private address: string) {
-        this.provider = new ethers.providers.JsonRpcProvider(this.jsonRpcProvider)
-        this.readOnlyRegistry = new ethers.Contract(this.address, registryABI, this.provider)
-    }
-
-    public async getNodeURL(countryCode: string, partyID: string): Promise<string> {
-        return this.readOnlyRegistry.nodeURLOf(this.toHex(countryCode), this.toHex(partyID))
-    }
-
-    public async getNodeAddress(countryCode: string, partyID: string): Promise<string> {
-        return this.readOnlyRegistry.nodeAddressOf(this.toHex(countryCode), this.toHex(partyID))
-    }
-
-    public async register(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
-        const signer = new ethers.Wallet(signerKey)
-        let spender = new ethers.Wallet(spenderKey)
-        spender = spender.connect(this.provider)
-        const writableRegistry = new ethers.Contract(this.address, registryABI, spender)
-        const countryHex = this.toHex(countryCode)
-        const partyIdHex = this.toHex(partyID)
-        const sig = await this.sign(countryHex, partyIdHex, nodeURL, nodeAddress, signer)
-        const tx = await writableRegistry.register(countryHex, partyIdHex, nodeURL, nodeAddress, sig.v, sig.r, sig.s)
-        await tx.wait()
-        return true
-    }
-
-    public async update(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, signerKey: string, spenderKey: string): Promise<boolean> {
-        const signer = new ethers.Wallet(signerKey)
-        let spender = new ethers.Wallet(spenderKey)
-        spender = spender.connect(this.provider)
-        const writableRegistry = new ethers.Contract(this.address, registryABI, spender)
-        const countryHex = this.toHex(countryCode)
-        const partyIdHex = this.toHex(partyID)
-        const sig = await this.sign(countryHex, partyIdHex, nodeURL, nodeAddress, signer)
-        const tx = await writableRegistry.updateNodeInfo(countryHex, partyIdHex, nodeURL, nodeAddress, sig.v, sig.r, sig.s)
-        await tx.wait()
-        return true
-    }
-
-    private toHex(str: string): string {
-        if (str.startsWith("0x")) {
-            throw Error("got hex string, want utf-8 string")
+    constructor(environment: string) {
+        if (!process.env.SIGNER_KEY) {
+            throw Error("No SIGNER_KEY environment variable provided.")
         }
-        return "0x" + Buffer.from(str).toString("hex")
+        this.signer = process.env.SIGNER_KEY
+        this.spender = process.env.SPENDER_KEY
+        this.registry = new Registry(environment, this.spender || this.signer)
     }
 
-    private async sign(countryCode: string, partyID: string, nodeURL: string, nodeAddress: string, wallet: ethers.Wallet): Promise<Signature> {
-        const msg = `${countryCode}${partyID}${nodeURL}${nodeAddress}`
-        const msgHash = ethers.utils.keccak256(Buffer.from(msg))
-        const msgHashBytes = ethers.utils.arrayify(msgHash)
-        const flatSig = await wallet.signMessage(msgHashBytes)
-        const sig = ethers.utils.splitSignature(flatSig)
-        return sig
+    public async getNode(countryCode: string, partyID: string): Promise<{ operator: string; url: string; }> {
+        const party = await this.registry.getPartyByOcpi(countryCode, partyID)
+        return party ? party.node : { operator: "0x0000000000000000000000000000000000000000", url: "" }
+
+    }
+
+    public async setParty(countryCode: string, partyID: string, roles: Role[], operator: string): Promise<boolean> {
+        if (this.spender) {
+            await this.registry.setPartyRaw(countryCode, partyID, roles, operator, this.signer)
+        } else {
+            await this.registry.setParty(countryCode, partyID, roles, operator)
+        }
+        return true
     }
 
 }

@@ -1,5 +1,4 @@
 import { assert } from "chai"
-import { ethers } from "ethers"
 import { EventEmitter } from "events"
 import "mocha"
 import { stopServer } from "../../src/api/index"
@@ -84,18 +83,6 @@ describe("Registration Service", () => {
 
         }
 
-    })
-
-    it("listInRegistry", async () => {
-        const signer = ethers.Wallet.createRandom().privateKey
-        const got = await registrationService.listInRegistry("DE", "MSP", "http://localhost:3001", "0x63937aBd9308ad672Df9A2a1dcb1b38961f29C11", signer, signer)
-        assert.equal(got, true)
-    })
-
-    it("updateInRegistry", async () => {
-        const signer = ethers.Wallet.createRandom().privateKey
-        const got = await registrationService.updateInRegistry("DE", "MSP", "http://localhost:3002", "0x0ccAF8cB1C92aef64dD36ce1f3882D195180AD5C", signer, signer)
-        assert.equal(got, true)
     })
 
     it("isConnectedToNode", async () => {

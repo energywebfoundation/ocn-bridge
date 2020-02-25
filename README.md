@@ -6,7 +6,7 @@ Right now the focus is on providing Charge Point Operator interfaces, but this c
 
 ## Usage:
 
-The bridge can be used in the following way (make sure you have permissions to read this repository):
+The bridge can be used in the following way:
 
 ```
 npm install https://bitbucket.org/shareandcharge/ocn-bridge.git
@@ -68,7 +68,7 @@ startBridge({
     
     // Interface providing writing/reading from an OCN Registry
     // must implement IPluggableRegistry (a DefaultRegistry class is provided in this case)
-    pluggableRegistry: new DefaultRegistry("http://localhost:8545", "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10")      
+    pluggableRegistry: new DefaultRegistry("local")      
 
     // [optional, default=false] set to true for morgan to log to stdout
     logger: true,        
