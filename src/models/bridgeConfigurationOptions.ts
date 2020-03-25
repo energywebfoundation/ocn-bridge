@@ -43,4 +43,5 @@ export interface IBridgeConfigurationOptions {
     port?: number
     logger?: boolean
     dryRun?: boolean
+    signatures?: boolean
 }

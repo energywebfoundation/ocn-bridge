@@ -16,6 +16,9 @@
 import { NextFunction, Request, Response } from "express"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableDB } from "../../../models/pluggableDB"
+import { SignerService } from "../../../services/signer.service"
+import { IncomingHttpHeaders } from "http"
+import { ISignableHeaders, IValuesToSign } from "@shareandcharge/ocn-notary/dist/ocpi-request.interface"
 
 /**
  * Express middleware to check for OCN node's TOKEN_C on incoming requests
@@ -27,5 +30,36 @@ export const isAuthorized = (pluggableDB: IPluggableDB) => {
             return res.status(401).send(OcpiResponse.withMessage(4001, "Unauthorized"))
         }
         return next()
+    }
+}
+
+export const hasValidSignature = (signerService?: SignerService) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        if (signerService) {
+            if (!req.headers["OCN-Signature"]) {
+                return res.status(400).send(OcpiResponse.withMessage(2001, "Missing required OCN-Signature header"))
+            }
+            try {
+                const values: IValuesToSign = {
+                    headers: extractHeaders(req.headers),
+                    params: req.params,
+                    body: req.body
+                }
+                await signerService.validate(req.headers["OCN-Signature"] as string, values)
+            } catch (err) {
+                return res.status(400).send(OcpiResponse.withMessage(2001, err.message))
+            }
+        }
+        return next()
+    }
+}
+
+function extractHeaders(headers: any): ISignableHeaders {
+    return {
+        "x-correlation-id": headers["x-correlation-id"],
+        "ocpi-from-country-code": headers["ocpi-from-country-code"],
+        "ocpi-from-party-id": headers["ocpi-from-party-id"],
+        "ocpi-to-country-code": headers["ocpi-to-country-code"],
+        "ocpi-to-party-id": headers["ocpi-to-party-id"]
     }
 }

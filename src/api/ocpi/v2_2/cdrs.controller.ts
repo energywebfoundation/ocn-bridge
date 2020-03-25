@@ -20,10 +20,11 @@ import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { formatPaginationParams } from "../../../tools/tools"
 import { CustomisableController } from "../advice/customisable"
+import { SignerService } from "../../../services/signer.service"
 
 export class CdrsController extends CustomisableController {
 
-    public static getRoutes(publicIP: string, pluggableAPI: IPluggableAPI, modules: IModules): Router {
+    public static getRoutes(publicIP: string, pluggableAPI: IPluggableAPI, modules: IModules, signer?: SignerService): Router {
         const router = Router()
 
         /**
@@ -36,11 +37,19 @@ export class CdrsController extends CustomisableController {
              */
             router.get("/receiver/2.2/cdrs/:id", async (req, res) => {
                 const cdr = await pluggableAPI.cdrs!.receiver!.get(req.params.id)
+                let statusCode: number
+                let body: OcpiResponse
+
                 if (cdr) {
-                    res.send(OcpiResponse.withData(cdr))
+                    statusCode = 200
+                    body = OcpiResponse.withData(cdr)
                 } else {
-                    res.status(404).send(OcpiResponse.withMessage(2003, "cdr not found"))
+                    statusCode = 404
+                    body = OcpiResponse.withMessage(2003, "cdr not found")
                 }
+                
+                body.ocn_signature = await signer?.getSignature({body})
+                res.status(statusCode).send(body)
             })
 
             /**
@@ -49,7 +58,10 @@ export class CdrsController extends CustomisableController {
             router.post("/receiver/2.2/cdrs", async (req, res) => {
                 pluggableAPI.cdrs!.receiver!.create(req.body)
                 const location = url.resolve(publicIP, `/ocpi/receiver/2.2/cdrs/${req.body.id}`)
-                res.set("Location", location).send(OcpiResponse.basicSuccess())
+
+                const body = OcpiResponse.basicSuccess()
+                body.ocn_signature = await signer?.getSignature({ headers: { "location": location }, body })
+                res.set("Location", location).send(body)
             })
 
         }
@@ -62,7 +74,10 @@ export class CdrsController extends CustomisableController {
             router.get("/sender/2.2/cdrs", async (req, res) => {
                 const params = formatPaginationParams(req.query)
                 const result = await pluggableAPI.cdrs!.sender!.getList(params)
-                res.set(result.headers).send(OcpiResponse.withData(result.data))
+
+                const body = OcpiResponse.withData(result.data)
+                body.ocn_signature = await signer?.getSignature({ headers: result.headers, body })
+                res.set(result.headers).send(body)
             })
         }
 

@@ -77,7 +77,10 @@ startBridge({
     port: 3001,      
     
     // [optional, default=false] start the bridge without trying to register
-    dryRun: true
+    dryRun: true,
+
+    // [optional, default=false] use SIGNER_KEY to sign requests/responses 
+    signatures: false
 
 }).then((bridge: http.Server) => {
 

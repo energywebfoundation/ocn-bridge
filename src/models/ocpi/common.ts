@@ -1,3 +1,5 @@
+import { SignerService } from "../../services/signer.service"
+
 /*
     Copyright 2019-2020 eMobilify GmbH
 
@@ -42,6 +44,7 @@ export interface IResponse<T> {
     status_code: number
     status_message?: string
     data?: T
+    ocn_signature?: string
 }
 
 export class OcpiResponse implements IResponse<any> {
@@ -62,6 +65,7 @@ export class OcpiResponse implements IResponse<any> {
     public status_message?: string
     public data?: any
     public timestamp: Date
+    public ocn_signature?: string
 
     constructor(options: IResponse<any>) {
         this.status_code = options.status_code
@@ -69,6 +73,10 @@ export class OcpiResponse implements IResponse<any> {
         this.data = options.data
         this.timestamp = new Date()
 
+    }
+
+    public addSignature(ocn_signature?: string) {
+        this.ocn_signature = ocn_signature
     }
 
 }

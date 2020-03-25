@@ -14,7 +14,10 @@
         "no-console": false,
         "object-literal-key-quotes": false,
         "no-string-literal": false,
-        "max-classes-per-file": false
+        "max-classes-per-file": false,
+        "ordered-imports": false,
+        "eofline": false,
+        "no-trailing-whitespace": false
     },
     "rulesDirectory": []
 }

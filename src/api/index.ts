@@ -19,8 +19,9 @@ import { Server } from "http"
 import morgan from "morgan"
 import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
 import { RegistrationService } from "../services/registration.service"
+import { SignerService } from "../services/signer.service"
 import { stripVersions } from "../tools/tools"
-import { isAuthorized } from "./ocpi/middleware/middleware"
+import { hasValidSignature, isAuthorized } from "./ocpi/middleware/middleware"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
@@ -42,6 +43,11 @@ homeController.get("/", async (_, res) => {
  */
 export const startServer = async (options: IBridgeConfigurationOptions): Promise<Server> => {
 
+    let signerService: SignerService | undefined
+    if (options.signatures) {
+        signerService = new SignerService()
+    }
+
     const app = express()
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
@@ -55,12 +61,13 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
     app.use(
         "/ocpi/",
         isAuthorized(options.pluggableDB),
-        VersionsController.getRoutes(options.publicBridgeURL, options.modules),
-        CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules),
-        LocationsController.getRoutes(options.pluggableAPI, options.modules),
-        TariffsController.getRoutes(options.pluggableAPI, options.modules),
-        SessionsController.getRoutes(options.pluggableAPI, options.modules),
-        CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules)
+        hasValidSignature(signerService),
+        VersionsController.getRoutes(options.publicBridgeURL, options.modules, signerService),
+        CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules, signerService),
+        LocationsController.getRoutes(options.pluggableAPI, options.modules, signerService),
+        TariffsController.getRoutes(options.pluggableAPI, options.modules, signerService),
+        SessionsController.getRoutes(options.pluggableAPI, options.modules, signerService),
+        CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules, signerService)
     )
 
     return new Promise(async (resolve, reject) => {
