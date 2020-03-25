@@ -61,8 +61,8 @@ export class CdrsController extends CustomisableController {
              */
             router.get("/sender/2.2/cdrs", async (req, res) => {
                 const params = formatPaginationParams(req.query)
-                const cdrs = await pluggableAPI.cdrs!.sender!.getList(params)
-                res.send(OcpiResponse.withData(cdrs))
+                const result = await pluggableAPI.cdrs!.sender!.getList(params)
+                res.set(result.headers).send(OcpiResponse.withData(result.data))
             })
         }
 

@@ -35,8 +35,8 @@ export class TariffsController extends CustomisableController {
              */
             router.get("/sender/2.2/tariffs", async (req, res) => {
                 const params = formatPaginationParams(req.query)
-                const tariffs = await pluggableAPI.tariffs!.sender!.getList(params)
-                res.send(OcpiResponse.withData(tariffs))
+                const result = await pluggableAPI.tariffs!.sender!.getList(params)
+                res.set(result.headers).send(OcpiResponse.withData(result.data))
             })
 
         }

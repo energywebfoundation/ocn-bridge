@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-import { sendCdrFunc, sendSessionFunc } from "../services/push.service";
+import { IOcpiParty } from "../services/push.service";
 import { IChargeDetailRecord } from "./ocpi/cdrs";
 import { IAsyncCommand, ICommandResult } from "./ocpi/commands";
 import { IPaginationParams } from "./ocpi/common";
@@ -38,6 +38,11 @@ export interface IStartSession {
     connector_id?: string
 }
 
+export interface IPaginationResponse<T> {
+    headers?: {[key: string]: string}
+    data: T
+}
+
 export interface IPluggableAPI {
     commands?: {
         sender?: {
@@ -46,14 +51,15 @@ export interface IPluggableAPI {
         receiver?: {
             cancelReservation(reservationID: string): Promise<IAsyncCommand>
             reserveNow(request: IReserveNow): Promise<IAsyncCommand>
-            startSession(request: IStartSession, sendSession: sendSessionFunc, sendCdr: sendCdrFunc): Promise<IAsyncCommand>
-            stopSession(sessionID: string): Promise<IAsyncCommand>
+            startSession(request: IStartSession, recipient: IOcpiParty): Promise<IAsyncCommand>
+            stopSession(sessionID: string, recipient: IOcpiParty): Promise<IAsyncCommand>
             unlockConnector(locationID: string, evseUID: string, connectorID: string): Promise<IAsyncCommand>
         }
     }
     locations?: {
         sender?: {
-            getList(pagination?: IPaginationParams): Promise<ILocation[]>
+            // TODO: needs to return Pair<ILocation[], Headers>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ILocation[]>>
             getObject(id: string): Promise<ILocation | undefined>
             getEvse(locationID: string, evseUID: string): Promise<IEvse | undefined>
             getConnector(locationID: string, evseUID: string, connectorID: string): Promise<IConnector | undefined>
@@ -61,7 +67,8 @@ export interface IPluggableAPI {
     }
     tariffs?: {
         sender?: {
-            getList(IPaginationParams?: IPaginationParams): Promise<ITariff[]>
+            // TODO: needs to return Pair<ILocation[], Headers>
+            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ITariff[]>>
         }
     }
     sessions?: {
@@ -69,7 +76,8 @@ export interface IPluggableAPI {
             update(session: ISession): void
         }
         sender?: {
-            getList(IPaginationParams?: IPaginationParams): Promise<ISession[]>
+            // TODO: needs to return Pair<ILocation[], Headers>
+            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
         }
     }
     cdrs?: {
@@ -78,7 +86,8 @@ export interface IPluggableAPI {
             create(cdr: IChargeDetailRecord): void
         }
         sender?: {
-            getList(IPaginationParams?: IPaginationParams): Promise<IChargeDetailRecord[]>
+            // TODO: needs to return Pair<ILocation[], Headers>
+            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<IChargeDetailRecord[]>>
         }
     }
 }

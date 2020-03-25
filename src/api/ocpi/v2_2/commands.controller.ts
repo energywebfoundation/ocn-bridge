@@ -21,7 +21,6 @@ import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/command
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
-import { PushService } from "../../../services/push.service"
 import { setResponseHeaders } from "../../../tools/tools"
 import { CustomisableController } from "../advice/customisable"
 
@@ -34,7 +33,7 @@ export class CommandsController extends CustomisableController {
      * Establish routes for the commands controller
      * @param pluggableAPI inject a pluggable API object to use in request handling
      */
-    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB, modules: IModules, pushService: PushService): Router {
+    public static getRoutes(pluggableAPI: IPluggableAPI, pluggableDB: IPluggableDB, modules: IModules): Router {
         const router = Router()
 
         /**
@@ -88,14 +87,13 @@ export class CommandsController extends CustomisableController {
             router.post("/receiver/2.2/commands/START_SESSION", async (req, res) => {
                 // separate response_url from rest of body
                 const { responseURL, out: startRequest } = this.extractResponseURL(req.body)
-                // prepare push functions
-                const sendSessionFunc = pushService.prepareSessionUpdate(req.headers)
-                const sendCdrFunc = pushService.prepareCDR(req.headers)
                 // await initial response from CPO
                 const response = await pluggableAPI.commands!.receiver!.startSession(
                     startRequest,
-                    sendSessionFunc,
-                    sendCdrFunc
+                    {
+                        country_code: req.headers["ocpi-from-country-code"] as string,
+                        party_id: req.headers["ocpi-from-party-id"] as string
+                    }
                 )
                 // send the initial response
                 res.send(OcpiResponse.withData(response.commandResponse))
@@ -108,7 +106,10 @@ export class CommandsController extends CustomisableController {
              */
             router.post("/receiver/2.2/commands/STOP_SESSION", async (req, res) => {
                 // await the initial repsonse to stop a session
-                const response = await pluggableAPI.commands!.receiver!.stopSession(req.body.session_id)
+                const response = await pluggableAPI.commands!.receiver!.stopSession(req.body.session_id, {
+                    country_code: req.headers["ocpi-from-country-code"] as string,
+                    party_id: req.headers["ocpi-from-party-id"] as string
+                })
                 // send the inital response
                 res.send(OcpiResponse.withData(response.commandResponse))
                 // send the async response from the charge point

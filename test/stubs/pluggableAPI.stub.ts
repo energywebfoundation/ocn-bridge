@@ -3,8 +3,8 @@ import { CommandResponseType, CommandResultType, IAsyncCommand, ICommandResult }
 import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
 import { ISession } from "../../src/models/ocpi/session";
 import { ITariff } from "../../src/models/ocpi/tariffs";
-import { IPluggableAPI } from "../../src/models/pluggableAPI";
-import { testCdr, testCdrList, testLocations, testSessionList, testTariffs} from "../data/test-data";
+import { IPaginationResponse, IPluggableAPI } from "../../src/models/pluggableAPI";
+import { testCdr, testCdrList, testLocations, testSessionList, testTariffs } from "../data/test-data";
 
 const asyncCommandNotSupported = {
     commandResponse: {
@@ -59,8 +59,8 @@ export class PluggableAPIStub implements IPluggableAPI {
     }
     public locations = {
         sender: {
-            async getList(): Promise<ILocation[]> {
-                return testLocations
+            async getList(): Promise<IPaginationResponse<ILocation[]>> {
+                return {data: testLocations}
             },
             async getObject(): Promise<ILocation | undefined> {
                 return testLocations[0]
@@ -78,8 +78,8 @@ export class PluggableAPIStub implements IPluggableAPI {
     }
     public tariffs = {
         sender: {
-            async getList(): Promise<ITariff[]> {
-                return testTariffs
+            async getList(): Promise<IPaginationResponse<ITariff[]>> {
+                return {data: testTariffs}
             }
         }
     }
@@ -90,8 +90,8 @@ export class PluggableAPIStub implements IPluggableAPI {
             }
         },
         sender: {
-            async getList(): Promise<ISession[]> {
-                return testSessionList
+            async getList(): Promise<IPaginationResponse<ISession[]>> {
+                return {data: testSessionList}
             }
         }
     }
@@ -105,8 +105,8 @@ export class PluggableAPIStub implements IPluggableAPI {
             }
         },
         sender: {
-            async getList(): Promise<IChargeDetailRecord[]> {
-                return testCdrList
+            async getList(): Promise<IPaginationResponse<IChargeDetailRecord[]>> {
+                return {data: testCdrList}
             }
         }
     }

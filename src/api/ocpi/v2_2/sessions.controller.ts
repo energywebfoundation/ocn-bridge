@@ -47,11 +47,8 @@ export class SessionsController extends CustomisableController {
             router.get("/sender/2.2/sessions", async (req, res) => {
                 await wrapApiMethod(async () => {
                     const params = formatPaginationParams(req.query)
-                    if (!params.date_from) {
-                        return res.send(OcpiResponse.withMessage(2001, "Missing date_from parameter"))
-                    }
-                    const cdrs = await pluggableAPI.sessions!.sender!.getList(params)
-                    return res.send(OcpiResponse.withData(cdrs))
+                    const result = await pluggableAPI.sessions!.sender!.getList(params)
+                    return res.set(result.headers).send(OcpiResponse.withData(result.data))
                 }, res)
             })
         }

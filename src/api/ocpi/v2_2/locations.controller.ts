@@ -42,8 +42,8 @@ export class LocationsController extends CustomisableController {
              */
             router.get("/sender/2.2/locations", async (req, res) => {
                 const params = formatPaginationParams(req.query)
-                const locations = await pluggableAPI.locations!.sender!.getList(params)
-                res.send(OcpiResponse.withData(locations))
+                const result = await pluggableAPI.locations!.sender!.getList(params)
+                res.set(result.headers).send(OcpiResponse.withData(result.data))
             })
 
             /**
