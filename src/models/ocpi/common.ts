@@ -75,10 +75,6 @@ export class OcpiResponse implements IResponse<any> {
 
     }
 
-    public addSignature(ocn_signature?: string) {
-        this.ocn_signature = ocn_signature
-    }
-
 }
 
 export class OcpiError extends Error {

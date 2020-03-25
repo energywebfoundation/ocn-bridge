@@ -17,9 +17,8 @@ export class SignerService {
         }
     }
 
-    async getSignature({headers, params, body}: { headers?: ISignableHeaders, params?: any, body?: any}): Promise<string> {
+    async getSignature({headers = {}, params, body}: { headers?: ISignableHeaders, params?: any, body?: any}): Promise<string> {
         try {
-            headers = headers || {}
             const notary = new Notary()
             await notary.sign({headers, params, body}, process.env.SIGNER_KEY!)
             return notary.serialize()
