@@ -1,4 +1,3 @@
-import { SignerService } from "../../services/signer.service"
 
 /*
     Copyright 2019-2020 eMobilify GmbH

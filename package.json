@@ -26,13 +26,13 @@
     "supertest": "^4.0.2",
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
-    "typescript": "^3.6.3"
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "@shareandcharge/ocn-notary": "^1.0.0",
     "@shareandcharge/ocn-registry": "^0.1.0",
     "body-parser": "^1.19.0",
-    "ethers": "^4.0.37",
+    "ethers": "^4.0.46",
     "express": "^4.17.1",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.0",

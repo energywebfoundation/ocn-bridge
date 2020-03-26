@@ -15,8 +15,9 @@
 */
 import * as url from "url";
 import { IModules, ModuleImplementation } from "../../../models/bridgeConfigurationOptions";
-import { identifier, IEndpoint, role } from "../../../models/ocpi/common";
+import { identifier, IEndpoint, role, OcpiResponse } from "../../../models/ocpi/common";
 import { IPluggableAPI } from "../../../models/pluggableAPI";
+import { Response } from "express";
 
 interface INeededModules {
     SENDER: identifier[]
@@ -27,6 +28,14 @@ interface INeededModules {
  * OCPI Module Customisation Advice for OCPI controllers
  */
 export class CustomisableController {
+
+    public static async errorHandlerWrapper(res: Response, executionFn: () => Promise<any>) {
+        try {
+            await executionFn()
+        } catch (err) {
+            res.send(OcpiResponse.withMessage(3000, err.message))
+        }
+    }
 
     /**
      * Gets endpoints for the VersionController (version detail endpoint) based on user preference

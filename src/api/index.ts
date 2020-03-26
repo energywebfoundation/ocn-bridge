@@ -21,7 +21,7 @@ import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOption
 import { RegistrationService } from "../services/registration.service"
 import { SignerService } from "../services/signer.service"
 import { stripVersions } from "../tools/tools"
-import { hasValidSignature, isAuthorized } from "./ocpi/middleware/middleware"
+import { hasValidSignature, isAuthorized, handleOcpiErrors } from "./ocpi/middleware/middleware"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
@@ -62,12 +62,13 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
         "/ocpi/",
         isAuthorized(options.pluggableDB),
         hasValidSignature(signerService),
-        VersionsController.getRoutes(options.publicBridgeURL, options.modules, signerService),
+        VersionsController.getRoutes(options.publicBridgeURL, options.modules),
         CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules, signerService),
         LocationsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         TariffsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         SessionsController.getRoutes(options.pluggableAPI, options.modules, signerService),
-        CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules, signerService)
+        CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules, signerService),
+        handleOcpiErrors
     )
 
     return new Promise(async (resolve, reject) => {

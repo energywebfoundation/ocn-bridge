@@ -17,8 +17,11 @@ import { NextFunction, Request, Response } from "express"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableDB } from "../../../models/pluggableDB"
 import { SignerService } from "../../../services/signer.service"
-import { IncomingHttpHeaders } from "http"
 import { ISignableHeaders, IValuesToSign } from "@shareandcharge/ocn-notary/dist/ocpi-request.interface"
+
+export const handleOcpiErrors = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    return res.send(OcpiResponse.withMessage(3000, err.message))
+}
 
 /**
  * Express middleware to check for OCN node's TOKEN_C on incoming requests

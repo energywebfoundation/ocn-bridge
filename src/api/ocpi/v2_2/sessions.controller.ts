@@ -17,12 +17,13 @@ import { Router } from "express"
 import { IModules } from "../../../models/bridgeConfigurationOptions"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
-import { formatPaginationParams, wrapApiMethod } from "../../../tools/tools"
+import { formatPaginationParams } from "../../../tools/tools"
 import { CustomisableController } from "../advice/customisable"
+import { SignerService } from "../../../services/signer.service"
 
 export class SessionsController extends CustomisableController {
 
-    public static getRoutes(pluggableAPI: IPluggableAPI, modules: IModules): Router {
+    public static getRoutes(pluggableAPI: IPluggableAPI, modules: IModules, signer?: SignerService): Router {
         const router = Router()
 
         /**
@@ -33,9 +34,15 @@ export class SessionsController extends CustomisableController {
             /**
              * PUT session
              */
-            router.put("/receiver/2.2/sessions/:country_code/:party_id/:session_id", async (req, res) => {
-                pluggableAPI.sessions!.receiver!.update(req.body)
-                res.send(OcpiResponse.basicSuccess())
+            router.put("/receiver/2.2/sessions/:country_code/:party_id/:session_id", async (req, res, next) => {
+                try {
+                    pluggableAPI.sessions!.receiver!.update(req.body)
+                    const body = OcpiResponse.basicSuccess()
+                    body.ocn_signature = await signer?.getSignature({ body })
+                    res.send(body )
+                } catch (err) {
+                    next(err)
+                }
             })
 
         }
@@ -44,12 +51,16 @@ export class SessionsController extends CustomisableController {
             /**
              * GET cdrs list
              */
-            router.get("/sender/2.2/sessions", async (req, res) => {
-                await wrapApiMethod(async () => {
+            router.get("/sender/2.2/sessions", async (req, res, next) => {
+                try {
                     const params = formatPaginationParams(req.query)
                     const result = await pluggableAPI.sessions!.sender!.getList(params)
-                    return res.set(result.headers).send(OcpiResponse.withData(result.data))
-                }, res)
+                    const body = OcpiResponse.withData(result.data)
+                    body.ocn_signature = await signer?.getSignature({ headers: result.headers, body })
+                    res.set(result.headers).send(body)
+                } catch (err) {
+                    next(err)
+                }
             })
         }
 
