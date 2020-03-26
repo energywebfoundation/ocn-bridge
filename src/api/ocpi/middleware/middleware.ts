@@ -19,28 +19,36 @@ import { IPluggableDB } from "../../../models/pluggableDB"
 import { SignerService } from "../../../services/signer.service"
 import { ISignableHeaders, IValuesToSign } from "@shareandcharge/ocn-notary/dist/ocpi-request.interface"
 
-export const handleOcpiErrors = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    return res.send(OcpiResponse.withMessage(3000, err.message))
+export const handleOcpiErrors = (signer?: SignerService) => {
+    return async (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+        const body = OcpiResponse.withMessage(3000, err.message)
+        body.ocn_signature = await signer?.getSignature({ body })
+        return res.send(body)
+    }
 }
 
 /**
  * Express middleware to check for OCN node's TOKEN_C on incoming requests
  */
-export const isAuthorized = (pluggableDB: IPluggableDB) => {
+export const isAuthorized = (pluggableDB: IPluggableDB, signer?: SignerService) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         const storedToken = await pluggableDB.getTokenB()
         if (req.headers.authorization !== `Token ${storedToken}`) {
-            return res.status(401).send(OcpiResponse.withMessage(4001, "Unauthorized"))
+            const body = OcpiResponse.withMessage(4001, "Unauthorized")
+            body.ocn_signature = await signer?.getSignature({ body })
+            return res.status(401).send(body)
         }
         return next()
     }
 }
 
-export const hasValidSignature = (signerService?: SignerService) => {
+export const hasValidSignature = (signer?: SignerService) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        if (signerService) {
+        if (signer) {
             if (!req.headers["OCN-Signature"]) {
-                return res.status(400).send(OcpiResponse.withMessage(2001, "Missing required OCN-Signature header"))
+                const body = OcpiResponse.withMessage(2001, "Missing required OCN-Signature header")
+                body.ocn_signature = await signer.getSignature({ body })
+                return res.status(400).send(body)
             }
             try {
                 const values: IValuesToSign = {
@@ -48,9 +56,11 @@ export const hasValidSignature = (signerService?: SignerService) => {
                     params: req.params,
                     body: req.body
                 }
-                await signerService.validate(req.headers["OCN-Signature"] as string, values)
+                await signer.validate(req.headers["OCN-Signature"] as string, values)
             } catch (err) {
-                return res.status(400).send(OcpiResponse.withMessage(2001, err.message))
+                const body = OcpiResponse.withMessage(2001, err.message)
+                body.ocn_signature = await signer.getSignature({ body })
+                return res.status(400).send(body)
             }
         }
         return next()
