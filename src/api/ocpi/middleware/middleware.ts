@@ -45,7 +45,7 @@ export const isAuthorized = (pluggableDB: IPluggableDB, signer?: SignerService) 
 export const hasValidSignature = (signer?: SignerService) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         if (signer) {
-            if (!req.headers["OCN-Signature"]) {
+            if (!req.headers["ocn-signature"]) {
                 const body = OcpiResponse.withMessage(2001, "Missing required OCN-Signature header")
                 body.ocn_signature = await signer.getSignature({ body })
                 return res.status(400).send(body)
@@ -56,7 +56,7 @@ export const hasValidSignature = (signer?: SignerService) => {
                     params: req.params,
                     body: req.body
                 }
-                await signer.validate(req.headers["OCN-Signature"] as string, values)
+                await signer.validate(req.headers["ocn-signature"] as string, values)
             } catch (err) {
                 const body = OcpiResponse.withMessage(2001, err.message)
                 body.ocn_signature = await signer.getSignature({ body })
