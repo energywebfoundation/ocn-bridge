@@ -20,14 +20,11 @@ import { IPluggableRegistry } from "./pluggableRegistry";
 
 export class DefaultRegistry implements IPluggableRegistry {
 
-    private signer: string
+    private signer?: string
     private spender?: string
     private registry: Registry
 
     constructor(environment: string) {
-        if (!process.env.SIGNER_KEY) {
-            throw Error("No SIGNER_KEY environment variable provided.")
-        }
         this.signer = process.env.SIGNER_KEY
         this.spender = process.env.SPENDER_KEY
         this.registry = new Registry(environment, this.spender || this.signer)
@@ -40,6 +37,9 @@ export class DefaultRegistry implements IPluggableRegistry {
     }
 
     public async setParty(countryCode: string, partyID: string, roles: Role[], operator: string): Promise<boolean> {
+        if (!this.signer) {
+            throw Error("No SIGNER_KEY environment variable provided.")
+        }
         if (this.spender) {
             await this.registry.setPartyRaw(countryCode, partyID, roles, operator, this.signer)
         } else {
