@@ -60,7 +60,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
 
     app.use(
         "/ocpi/",
-        isAuthorized(options.pluggableDB),
+        isAuthorized(options.pluggableDB, signerService),
         hasValidSignature(signerService),
         VersionsController.getRoutes(options.publicBridgeURL, options.modules),
         CommandsController.getRoutes(options.pluggableAPI, options.pluggableDB, options.modules, signerService),
@@ -68,7 +68,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
         TariffsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         SessionsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules, signerService),
-        handleOcpiErrors
+        handleOcpiErrors(signerService)
     )
 
     return new Promise(async (resolve, reject) => {
