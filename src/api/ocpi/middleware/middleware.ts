@@ -53,7 +53,7 @@ export const hasValidSignature = (signer?: SignerService) => {
             try {
                 const values: IValuesToSign = {
                     headers: extractHeaders(req.headers),
-                    params: req.params,
+                    params: req.query,
                     body: req.body
                 }
                 await signer.validate(req.headers["ocn-signature"] as string, values)
