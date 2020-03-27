@@ -95,7 +95,7 @@ export class PushService {
             "ocpi-to-party-id": recipient.party_id
         }
         
-        const signature = { "OCN-Signature": await this.signer?.getSignature({ headers: signable, body }) }
+        const signature = { "OCN-Signature": await this.signer.getSignature({ headers: signable, body }) }
         
         return Object.assign(signature, headers)
     }
