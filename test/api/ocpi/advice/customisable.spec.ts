@@ -44,6 +44,11 @@ describe("Customisable Controller Advice", () => {
                         url: "http://localhost:8080/ocpi/sender/2.2/sessions"
                     },
                     {
+                        identifier: "tokens",
+                        role: "SENDER",
+                        url: "http://localhost:8080/ocpi/sender/2.2/tokens"
+                    },
+                    {
                         identifier: "commands",
                         role: "RECEIVER",
                         url: "http://localhost:8080/ocpi/receiver/2.2/commands"
@@ -54,9 +59,9 @@ describe("Customisable Controller Advice", () => {
                         url: "http://localhost:8080/ocpi/receiver/2.2/sessions"
                     },
                     {
-                      identifier: "cdrs",
-                      role: "RECEIVER",
-                      url: "http://localhost:8080/ocpi/receiver/2.2/cdrs"
+                        identifier: "cdrs",
+                        role: "RECEIVER",
+                        url: "http://localhost:8080/ocpi/receiver/2.2/cdrs"
                     }
                 ]
             },
@@ -101,6 +106,11 @@ describe("Customisable Controller Advice", () => {
                         identifier: "commands",
                         role: "SENDER",
                         url: "https://big.company.com/ocpi/sender/2.2/commands"
+                    },
+                    {
+                        identifier: "tokens",
+                        role: "SENDER",
+                        url: "https://big.company.com/ocpi/sender/2.2/tokens"
                     },
                     {
                         identifier: "sessions",

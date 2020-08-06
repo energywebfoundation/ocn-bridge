@@ -29,6 +29,7 @@ import { LocationsController } from "./ocpi/v2_2/locations.controller"
 import { SessionsController } from "./ocpi/v2_2/sessions.controller"
 import { TariffsController } from "./ocpi/v2_2/tariffs.controller"
 import { VersionsController } from "./ocpi/versions.controller"
+import { TokensController } from "./ocpi/v2_2/tokens.controller"
 
 // set basic home route
 const homeController = Router()
@@ -68,6 +69,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
         TariffsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         SessionsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules, signerService),
+        TokensController.getRoutes(options.pluggableAPI, options.modules, signerService),
         handleOcpiErrors(signerService)
     )
 

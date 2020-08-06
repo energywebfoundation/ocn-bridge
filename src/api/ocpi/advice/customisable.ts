@@ -87,7 +87,7 @@ export class CustomisableController {
 
         switch (modules.implementation) {
             case ModuleImplementation.ALL:
-                needed.SENDER = ["commands", "locations", "tariffs", "cdrs", "sessions"],
+                needed.SENDER = ["commands", "locations", "tariffs", "cdrs", "sessions", "tokens"],
                 needed.RECEIVER = ["commands", "sessions", "cdrs"]
                 break
             case ModuleImplementation.CPO:
@@ -95,15 +95,12 @@ export class CustomisableController {
                 needed.RECEIVER = ["commands"]
                 break
             case ModuleImplementation.MSP:
-                needed.SENDER = ["commands"],
+                needed.SENDER = ["commands", "tokens"],
                 needed.RECEIVER = ["sessions", "cdrs"]
                 break
             case ModuleImplementation.CUSTOM:
-                if (!modules.sender || !modules.receiver) {
-                    throw Error("Module implementation is \"CUSTOM\" but sender and receiver interfaces not provided")
-                }
-                needed.SENDER = modules.sender,
-                needed.RECEIVER = modules.receiver
+                needed.SENDER = modules.sender || [],
+                needed.RECEIVER = modules.receiver || []
         }
 
         return needed

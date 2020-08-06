@@ -20,7 +20,7 @@ import { IPaginationParams } from "./ocpi/common";
 import { IConnector, IEvse, ILocation } from "./ocpi/locations";
 import { ISession } from "./ocpi/session";
 import { ITariff } from "./ocpi/tariffs";
-import { IToken } from "./ocpi/tokens";
+import { IToken, ITokenType, ILocationReferences, IAuthorizationInfo, IUnauthorizedToken } from "./ocpi/tokens";
 
 export interface IReserveNow {
     token: IToken
@@ -58,7 +58,6 @@ export interface IPluggableAPI {
     }
     locations?: {
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
             getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ILocation[]>>
             getObject(id: string): Promise<ILocation | undefined>
             getEvse(locationID: string, evseUID: string): Promise<IEvse | undefined>
@@ -67,8 +66,7 @@ export interface IPluggableAPI {
     }
     tariffs?: {
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
-            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ITariff[]>>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ITariff[]>>
         }
     }
     sessions?: {
@@ -76,8 +74,7 @@ export interface IPluggableAPI {
             update(session: ISession): void
         }
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
-            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
         }
     }
     cdrs?: {
@@ -86,8 +83,14 @@ export interface IPluggableAPI {
             create(cdr: IChargeDetailRecord): void
         }
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
-            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<IChargeDetailRecord[]>>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<IChargeDetailRecord[]>>
+        }
+    },
+    tokens?: {
+        sender?: {
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<IToken[]>>
+            authorize(tokenUid: string, type: ITokenType, location: ILocationReferences): Promise<IAuthorizationInfo | IUnauthorizedToken>
+
         }
     }
 }

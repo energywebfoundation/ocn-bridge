@@ -1,3 +1,5 @@
+import { IDisplayText } from "./common";
+
 /*
     Copyright 2019-2020 eMobilify GmbH
 
@@ -34,3 +36,21 @@ export interface IToken {
 }
 
 export type ITokenType = "AD_HOC_USER" | "APP_USER" | "OTHER" | "RFID"
+
+export interface ILocationReferences {
+    location_id: string
+    evse_uids: string[]
+}
+
+export interface IAuthorizationInfo {
+    allowed: "ALLOWED" | "BLOCKED" | "EXPIRED" | "NO_CREDIT" | "NOT_ALLOWED"
+    token: IToken
+    location?: ILocationReferences
+    authorization_reference?: string
+    info?: IDisplayText
+}
+
+export interface IUnauthorizedToken {
+    unknownToken?: boolean
+    notEnoughInformation?: boolean
+}

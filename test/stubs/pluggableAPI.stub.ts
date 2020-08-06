@@ -4,7 +4,7 @@ import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
 import { ISession } from "../../src/models/ocpi/session";
 import { ITariff } from "../../src/models/ocpi/tariffs";
 import { IPaginationResponse, IPluggableAPI } from "../../src/models/pluggableAPI";
-import { testCdr, testCdrList, testLocations, testSessionList, testTariffs } from "../data/test-data";
+import { testCdr, testCdrList, testLocations, testSessionList, testTariffs, testTokens, testAuthorizationInfo } from "../data/test-data";
 
 const asyncCommandNotSupported = {
     commandResponse: {
@@ -107,6 +107,17 @@ export class PluggableAPIStub implements IPluggableAPI {
         sender: {
             async getList(): Promise<IPaginationResponse<IChargeDetailRecord[]>> {
                 return {data: testCdrList}
+            }
+        }
+    }
+
+    public tokens = {
+        sender: {
+            async getList() {
+                return {data: testTokens}
+            },
+            async authorize() {
+                return testAuthorizationInfo
             }
         }
     }
