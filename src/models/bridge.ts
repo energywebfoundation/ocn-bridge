@@ -1,7 +1,7 @@
 import { Server } from "http";
-import { PushService } from "../services";
+import { RequestService } from "../services";
 
 export interface IBridge {
     server: Server,
-    pushService: PushService
+    requests: RequestService
 }

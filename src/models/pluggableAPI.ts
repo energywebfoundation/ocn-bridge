@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-import { IOcpiParty } from "../services/push.service";
+import { IOcpiParty } from "../services/request.service";
 import { IChargeDetailRecord } from "./ocpi/cdrs";
 import { IAsyncCommand, ICommandResult } from "./ocpi/commands";
 import { IPaginationParams } from "./ocpi/common";

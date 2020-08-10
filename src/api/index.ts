@@ -29,7 +29,7 @@ import { SessionsController } from "./ocpi/v2_2/sessions.controller"
 import { TariffsController } from "./ocpi/v2_2/tariffs.controller"
 import { VersionsController } from "./ocpi/versions.controller"
 import { IBridge } from "../models"
-import { PushService } from "../services"
+import { RequestService } from "../services"
 
 // set basic home route
 const homeController = Router()
@@ -87,7 +87,7 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
 
             err ? reject(err) : resolve({
                 server,
-                pushService: new PushService(options.pluggableDB, options.roles[0], signerService)
+                requests: new RequestService(options.pluggableDB, options.roles[0], signerService)
             })
         })
     })

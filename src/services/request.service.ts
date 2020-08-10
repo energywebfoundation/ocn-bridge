@@ -34,10 +34,10 @@ export interface IOcpiResponse<T> {
 }
 
 /**
- * WIP push service instantiated by the bridge.
+ * WIP push/pull service instantiated by the bridge.
  * Contains common PUSH methods used in OCPI.
  */
-export class PushService {
+export class RequestService {
 
     constructor(private db: IPluggableDB, private from: IOcpiParty, private signer?: SignerService) {}
 

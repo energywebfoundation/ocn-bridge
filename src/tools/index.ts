@@ -16,7 +16,7 @@
 import { IncomingHttpHeaders } from "http"
 import * as uuid from "uuid"
 import { IHeaders, IPaginationParams } from "../models/ocpi/common"
-import { IOcpiParty } from "../services/push.service"
+import { IOcpiParty } from "../services/request.service"
 
 export const stripVersions = (url: string): string => {
     if (url.endsWith("/ocpi/versions")) {
