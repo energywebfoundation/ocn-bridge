@@ -19,29 +19,55 @@ import { IChargeDetailRecord } from "../models/ocpi/cdrs";
 import { ISession } from "../models/ocpi/sessions";
 import { IPluggableDB } from "../models/pluggableDB";
 import { SignerService } from "./signer.service";
+import { ILocation, IToken } from "../models";
 
 export interface IOcpiParty {
     country_code: string
     party_id: string
 }
 
-export interface IOcpiResponse {
+export interface IOcpiResponse<T> {
     status_code: string
     status_message?: string
-    data?: any
+    data?: T
     timestamp: string
 }
 
+/**
+ * WIP push service instantiated by the bridge.
+ * Contains common PUSH methods used in OCPI.
+ */
 export class PushService {
 
     constructor(private db: IPluggableDB, private from: IOcpiParty, private signer?: SignerService) {}
 
     /**
-     * Prepare push updates for a particular session
-     * @param headers incoming request headers used for response routing
-     * @returns anonymous function which sends the session to the request's sender
+     * Send a request to obtain location data (i.e. GET sender interface)
+     * @param recipient party the request should be sent to 
      */
-    public async sendSession(recipient: IOcpiParty, session: ISession): Promise<IOcpiResponse> {
+    public async getLocations(recipient: IOcpiParty): Promise<IOcpiResponse<ILocation[]>> {
+        const endpoint = await this.db.getEndpoint("locations", "SENDER")
+        const headers = await this.getHeaders(recipient)
+        const response = await fetch(endpoint, { headers })
+        return response.json()
+    }
+
+    /**
+     * Send a request to obtain token data (i.e. GET sender interface)
+     * @param recipient party the request should be sent to 
+     */
+    public async getTokens(recipient: IOcpiParty): Promise<IOcpiResponse<IToken[]>> {
+        const endpoint = await this.db.getEndpoint("tokens", "SENDER")
+        const headers = await this.getHeaders(recipient)
+        const response = await fetch(endpoint, { headers })
+        return response.json()
+    }
+
+    /**
+     * Send session data (i.e. PUT receiver interface)
+     * @param headers incoming request headers used for response routing
+     */
+    public async sendSession(recipient: IOcpiParty, session: ISession): Promise<IOcpiResponse<undefined>> {
         const endpoint = await this.db.getEndpoint("sessions", "RECEIVER")
         const path = `/${recipient.country_code}/${recipient.party_id}/${session.id}`
         const url = endpoint + path
@@ -55,11 +81,10 @@ export class PushService {
     }
 
     /**
-     * Prepare a push charge detail record request for a particular session
+     * Sends a charge detail record for a particular session (i.e. POST receiver interface)
      * @param headers incoming request headers used for response routing
-     * @returns anonymous function which sends the cdr to the request's sender
      */
-    public async sendCdr(recipient: IOcpiParty, cdr: IChargeDetailRecord): Promise<IOcpiResponse> {
+    public async sendCdr(recipient: IOcpiParty, cdr: IChargeDetailRecord): Promise<IOcpiResponse<undefined>> {
         const url = await this.db.getEndpoint("cdrs", "RECEIVER")
         const headers = await this.getHeaders(recipient, cdr)
         const response = await fetch(url, {
@@ -70,10 +95,9 @@ export class PushService {
         return response.json()
     }
 
-    private async getHeaders(recipient: IOcpiParty, body: any): Promise<{[key: string]: string}> {
+    private async getHeaders(recipient: IOcpiParty, body?: any): Promise<{[key: string]: string}> {
         const correlationId = uuid.v4()
-        const headers = {
-            "Content-Type": "application/json",
+        const headers: {[key: string]: string} = {
             "Authorization": await this.db.getTokenC(),
             "X-Request-ID": uuid.v4(),
             "X-Correlation-ID": correlationId,
@@ -81,6 +105,10 @@ export class PushService {
             "OCPI-From-Party-Id": this.from.party_id,
             "OCPI-To-Country-Code": recipient.country_code,
             "OCPI-To-Party-Id": recipient.party_id
+        }
+
+        if (body) {
+            headers["Content-Type"] = "application/json"
         }
 
         if (!this.signer) {
