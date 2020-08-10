@@ -39,9 +39,11 @@ export interface IBridgeConfigurationOptions {
     modules: IModules
     pluggableAPI: IPluggableAPI
     pluggableDB: IPluggableDB
-    pluggableRegistry: IPluggableRegistry
+    pluggableRegistry?: IPluggableRegistry
     port?: number
     logger?: boolean
     dryRun?: boolean
     signatures?: boolean
+    signer?: string
+    tokenA?: string
 }

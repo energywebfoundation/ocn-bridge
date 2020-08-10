@@ -19,8 +19,8 @@ import { ISignableHeaders, IValuesToSign } from "@shareandcharge/ocn-notary/dist
 
 export class SignerService {
 
-    constructor() {
-        if (!process.env.SIGNER_KEY) {
+    constructor(private signer?: string) {
+        if (!this.signer) {
             throw Error("No SIGNER_KEY provided. Cannot sign and verify messages.")
         }
     }
@@ -36,7 +36,7 @@ export class SignerService {
     public async getSignature({headers = {}, params, body}: { headers?: ISignableHeaders, params?: any, body?: any}): Promise<string> {
         try {
             const notary = new Notary()
-            await notary.sign({headers, params, body}, process.env.SIGNER_KEY!)
+            await notary.sign({headers, params, body}, this.signer!)
             return notary.serialize()
         } catch (err) {
             return err.message

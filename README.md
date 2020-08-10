@@ -31,7 +31,7 @@ To start the bridge, call the `startBridge` function with a configuration object
 ```ts
 startBridge({
 
-    // publicly avialable URL of the Bridge 
+    // publicly available URL of the Bridge 
     // note the bridge binds to localhost; use a reverse proxy like Nginx with SSL
     publicBridgeURL: "http://bridge.cpo.net",
 
@@ -68,7 +68,8 @@ startBridge({
     
     // Interface providing writing/reading from an OCN Registry
     // must implement IPluggableRegistry (a DefaultRegistry class is provided in this case)
-    pluggableRegistry: new DefaultRegistry("local")      
+    // if writing to the registry must provide private key as second optional
+    pluggableRegistry: new DefaultRegistry("local", "0x123...")      
 
     // [optional, default=false] set to true for morgan to log to stdout
     logger: true,        
@@ -81,6 +82,11 @@ startBridge({
 
     // [optional, default=false] use SIGNER_KEY to sign requests/responses 
     signatures: false
+
+    // [optional] private key used to sign OCPI requests (needed if signatures: true)
+
+    // [optional] token A for OCPI registration (credentials handshake) with OCN Node
+    tokenA: "token-a"
 
 }).then((bridge: http.Server) => {
 

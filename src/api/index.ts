@@ -45,7 +45,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
 
     let signerService: SignerService | undefined
     if (options.signatures) {
-        signerService = new SignerService()
+        signerService = new SignerService(options.signer)
     }
 
     const app = express()
@@ -75,7 +75,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
         const server = app.listen(options.port || 3000, async (err?: Error) => {
 
             if (!options.dryRun) {
-                const registrationService = new RegistrationService(options.pluggableRegistry, options.pluggableDB)
+                const registrationService = new RegistrationService(options.pluggableDB, options.pluggableRegistry, options.tokenA)
 
                 await registrationService.register(
                     options.publicBridgeURL,

@@ -28,7 +28,7 @@ describe("Registration Service", () => {
         db = new PluggableDBStub()
         db.setTokenB("token-b")
         db.setTokenC("token-c")
-        registrationService = new RegistrationService(registry, db)
+        registrationService = new RegistrationService(db, registry, "token-a")
     })
 
     it("getNodeInfo", async () => {
@@ -73,7 +73,7 @@ describe("Registration Service", () => {
         for (const test of testCases) {
 
             it(test.name, async () => {
-                const modifiedRegistrationService = new RegistrationService(test.registry, db)
+                const modifiedRegistrationService = new RegistrationService(db, test.registry, "token-a")
                 const got = await modifiedRegistrationService.isListedInRegistry("DE", "MSP", {
                     url: "http://localhost:3001",
                     address: "0x63937aBd9308ad672Df9A2a1dcb1b38961f29C11"
@@ -97,7 +97,7 @@ describe("Registration Service", () => {
         })
         modifiedDB.setTokenC("token-c")
 
-        const modifiedRegistrationService = new RegistrationService(registry, modifiedDB)
+        const modifiedRegistrationService = new RegistrationService(modifiedDB, registry, "token-a")
 
         const ocnNode = await startNode(3001)
 
@@ -128,7 +128,7 @@ describe("Registration Service", () => {
             }]
         })
 
-        const modifiedRegistrationService = new RegistrationService(registry, modifiedDB)
+        const modifiedRegistrationService = new RegistrationService(modifiedDB, registry, "token-a")
 
         const events = new EventEmitter()
 

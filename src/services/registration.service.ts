@@ -28,13 +28,16 @@ import { IPluggableDB } from "../models/pluggableDB";
 
 export class RegistrationService {
 
-    constructor(private registry: IPluggableRegistry, private db: IPluggableDB) { }
+    constructor(private db: IPluggableDB, private registry?: IPluggableRegistry, private tokenA?: string) {}
 
     public async register(publicIP: string, nodeURL: string, roles: IRole[]): Promise<void> {
         const nodeInfo = await this.getNodeInfo(nodeURL)
         for (const role of roles) {
             const listing = await this.isListedInRegistry(role.country_code, role.party_id, nodeInfo)
             if (listing !== registryListing.OK) {
+                if (!this.registry) {
+                    throw Error("Need pluggableRegistry option to set party details in OCN Registry.")
+                }
                 await this.registry.setParty(role.country_code, role.party_id, [this.toRole(role.role)], nodeInfo.address)
             }
         }
@@ -42,15 +45,15 @@ export class RegistrationService {
         if (isConnected) {
             return
         }
-        if (!process.env.TOKEN_A) {
-            throw Error("need TOKEN_A to complete registration process with OCN node")
+        if (!this.tokenA) {
+            throw Error("Need tokenA option to complete registration process with OCN Node.")
         }
-        await this.getNodeEndpoints(url.resolve(nodeURL, "/ocpi/versions"), process.env.TOKEN_A)
+        await this.getNodeEndpoints(url.resolve(nodeURL, "/ocpi/versions"), this.tokenA)
         await this.connectToNode({
             token: uuid.v4(),
             url: url.resolve(publicIP, "/ocpi/versions"),
             roles
-        }, process.env.TOKEN_A)
+        }, this.tokenA)
     }
 
     public async getNodeInfo(nodeURL: string): Promise<INodeInfo> {
@@ -59,6 +62,9 @@ export class RegistrationService {
     }
 
     public async isListedInRegistry(countryCode: string, partyID: string, expectedNodeInfo: INodeInfo): Promise<registryListing> {
+        if (!this.registry) {
+            throw Error("Need pluggableRegistry option to set party details in OCN Registry.")
+        }
         const node = await this.registry.getNode(countryCode, partyID)
 
         if ((node.url === expectedNodeInfo.url) && (utils.getAddress(node.operator) === utils.getAddress(expectedNodeInfo.address))) {
@@ -94,16 +100,16 @@ export class RegistrationService {
         if (availableVersions.data) {
             const foundVersion = availableVersions.data.find((v) => v.version === "2.2")
             if (!foundVersion) {
-                throw Error("Could not find 2.2 in OCN node's available OCPI versions")
+                throw Error("Could not find 2.2 in OCN node's available OCPI versions.")
             }
             const versionDetailRes = await fetch(foundVersion.url, { headers })
             const versionDetail: IResponse<IVersionDetail> = await versionDetailRes.json()
             if (!versionDetail.data) {
-                throw Error("Unable to request OCN node's 2.2 version details")
+                throw Error("Unable to request OCN node's 2.2 version details.")
             }
             await this.db.saveEndpoints(versionDetail.data)
         } else {
-            throw Error("Unable to request OCN node's OCPI versions")
+            throw Error("Unable to request OCN node's OCPI versions.")
         }
     }
 
@@ -120,7 +126,7 @@ export class RegistrationService {
         })
         const nodeCredentials: IResponse<ICredentials> = await credentialsRes.json()
         if (!nodeCredentials.data) {
-            throw Error("Did not receive CREDENTIALS_TOKEN_C from OCN node")
+            throw Error("Did not receive CREDENTIALS_TOKEN_C from OCN node.")
         }
         await this.db.setTokenC(nodeCredentials.data.token)
     }

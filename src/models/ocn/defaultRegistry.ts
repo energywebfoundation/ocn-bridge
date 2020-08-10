@@ -20,20 +20,15 @@ import { IPluggableRegistry } from "./pluggableRegistry";
 
 export class DefaultRegistry implements IPluggableRegistry {
 
-    private signer?: string
-    private spender?: string
     private registry: Registry
 
-    constructor(environment: string) {
-        this.signer = process.env.SIGNER_KEY
-        this.spender = process.env.SPENDER_KEY
+    constructor(environment: string, private signer?: string, private spender?: string) {
         this.registry = new Registry(environment, this.spender || this.signer)
     }
 
     public async getNode(countryCode: string, partyID: string): Promise<{ operator: string; url: string; }> {
         const party = await this.registry.getPartyByOcpi(countryCode, partyID)
         return party ? party.node : { operator: "0x0000000000000000000000000000000000000000", url: "" }
-
     }
 
     public async setParty(countryCode: string, partyID: string, roles: Role[], operator: string): Promise<boolean> {
