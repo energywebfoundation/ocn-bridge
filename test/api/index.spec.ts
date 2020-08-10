@@ -1,5 +1,4 @@
 import { assert } from "chai"
-import { Server } from "http"
 import "mocha"
 import fetch from "node-fetch"
 import { startBridge, stopBridge } from "../../src/api/index"
@@ -8,13 +7,14 @@ import { testRoles } from "../data/test-data"
 import { PluggableAPIStub } from "../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../src/models"
 
 describe("API context", () => {
 
-    let app: Server
+    let bridge: IBridge
 
     beforeEach(async () => {
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -29,7 +29,7 @@ describe("API context", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
+        await stopBridge(bridge)
     })
 
     it("should load", async () => {

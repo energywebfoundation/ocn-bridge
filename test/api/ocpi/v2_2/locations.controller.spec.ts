@@ -1,19 +1,18 @@
 import { assert } from "chai"
 import { Server } from "http"
-import "mocha"
 import request from "supertest"
 import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testLocations, testRoles } from "../../../data/test-data"
-import { startNode } from "../../../mock/ocn-node"
+import { startNode, stopNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../../src/models"
 
 describe("OCPI Locations Controller", () => {
 
-    let app: Server
-
+    let bridge: IBridge
     let ocnNode: Server
 
     beforeEach(async () => {
@@ -21,7 +20,7 @@ describe("OCPI Locations Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -40,15 +39,15 @@ describe("OCPI Locations Controller", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
-        await stopBridge(ocnNode)
+        await stopBridge(bridge)
+        await stopNode(ocnNode)
     })
 
     context("Sender interface", () => {
 
         it("should return list of locations", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .get("/ocpi/sender/2.2/locations")
                 .query({
                     date_from: new Date(),
@@ -76,82 +75,82 @@ describe("OCPI Locations Controller", () => {
 
         it("should return single location", (done) => {
 
-            request(app)
-            .get("/ocpi/sender/2.2/locations/LOC1")
-            .set("Authorization", "Token token-b")
-            .set("X-Request-ID", "123")
-            .set("X-Correlation-ID", "456")
-            .set("OCPI-From-Country-Code", "DE")
-            .set("OCPI-From-Party-Id", "MSP")
-            .set("OCPI-To-Country-Code", "DE")
-            .set("OCPI-To-Party-Id", "CPO")
-            .send()
-            .expect(200)
-            .end((err, result) => {
-                if (err) {
-                    return done(err)
-                }
+            request(bridge.server)
+                .get("/ocpi/sender/2.2/locations/LOC1")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send()
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
 
-                assert.equal(result.body.status_code, 1000)
-                assert.deepEqual(result.body.data, testLocations[0])
-                done()
-            })
+                    assert.equal(result.body.status_code, 1000)
+                    assert.deepEqual(result.body.data, testLocations[0])
+                    done()
+                })
         })
 
         it("should return single evse", (done) => {
 
-            request(app)
-            .get("/ocpi/sender/2.2/locations/LOC1/1234")
-            .set("Authorization", "Token token-b")
-            .set("X-Request-ID", "123")
-            .set("X-Correlation-ID", "456")
-            .set("OCPI-From-Country-Code", "DE")
-            .set("OCPI-From-Party-Id", "MSP")
-            .set("OCPI-To-Country-Code", "DE")
-            .set("OCPI-To-Party-Id", "CPO")
-            .send()
-            .expect(200)
-            .end((err, result) => {
-                if (err) {
-                    return done(err)
-                }
+            request(bridge.server)
+                .get("/ocpi/sender/2.2/locations/LOC1/1234")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send()
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
 
-                assert.equal(result.body.status_code, 1000)
-                if (testLocations[0].evses && testLocations[0].evses[0]) {
-                    assert.deepEqual(result.body.data, testLocations[0].evses[0])
-                } else {
-                    done(new Error("test location doesn't have an EVSE"))
-                }
-                done()
-            })
+                    assert.equal(result.body.status_code, 1000)
+                    if (testLocations[0].evses && testLocations[0].evses[0]) {
+                        assert.deepEqual(result.body.data, testLocations[0].evses[0])
+                    } else {
+                        done(new Error("test location doesn't have an EVSE"))
+                    }
+                    done()
+                })
         })
 
         it("should return single connector", (done) => {
 
-            request(app)
-            .get("/ocpi/sender/2.2/locations/LOC1/1234/1")
-            .set("Authorization", "Token token-b")
-            .set("X-Request-ID", "123")
-            .set("X-Correlation-ID", "456")
-            .set("OCPI-From-Country-Code", "DE")
-            .set("OCPI-From-Party-Id", "MSP")
-            .set("OCPI-To-Country-Code", "DE")
-            .set("OCPI-To-Party-Id", "CPO")
-            .send()
-            .expect(200)
-            .end((err, result) => {
-                if (err) {
-                    return done(err)
-                }
+            request(bridge.server)
+                .get("/ocpi/sender/2.2/locations/LOC1/1234/1")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send()
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
 
-                assert.equal(result.body.status_code, 1000)
-                if (testLocations[0].evses && testLocations[0].evses[0]) {
-                    assert.deepEqual(result.body.data, testLocations[0].evses[0].connectors[0])
-                } else {
-                    done(new Error("test location doesn't have an EVSE"))
-                }
-                done()
-            })
+                    assert.equal(result.body.status_code, 1000)
+                    if (testLocations[0].evses && testLocations[0].evses[0]) {
+                        assert.deepEqual(result.body.data, testLocations[0].evses[0].connectors[0])
+                    } else {
+                        done(new Error("test location doesn't have an EVSE"))
+                    }
+                    done()
+                })
         })
 
     })

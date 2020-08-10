@@ -1,19 +1,18 @@
 import { assert } from "chai"
 import { Server } from "http"
-import "mocha"
 import request from "supertest"
 import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testSession, testSessionList } from "../../../data/test-data"
-import { startNode } from "../../../mock/ocn-node"
+import { startNode, stopNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../../src/models"
 
 describe("OCPI Sessions Controller", () => {
 
-    let app: Server
-
+    let bridge: IBridge
     let ocnNode: Server
 
     beforeEach(async () => {
@@ -21,7 +20,7 @@ describe("OCPI Sessions Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -40,15 +39,15 @@ describe("OCPI Sessions Controller", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
-        await stopBridge(ocnNode)
+        await stopBridge(bridge)
+        await stopNode(ocnNode)
     })
 
     context("Receiver interface", () => {
 
         it("should return 1000 on PUT session", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .put("/ocpi/receiver/2.2/sessions/DE/CPO/1234")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
@@ -75,7 +74,7 @@ describe("OCPI Sessions Controller", () => {
 
         it("should return 1000 on Get session", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .get("/ocpi/sender/2.2/sessions?date_from=2019-12-06T12:50:57.394Z")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")

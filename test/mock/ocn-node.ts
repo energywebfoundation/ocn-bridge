@@ -87,3 +87,11 @@ export const startNode = async (port: number, events: EventEmitter = new EventEm
         const server = node.listen(port, () => resolve(server))
     })
 }
+
+export const stopNode = async (node: Server) => {
+    return new Promise((resolve, reject) => {
+        node.close((err?: Error) => {
+            err ? reject(err) : resolve()
+        })
+    })
+}

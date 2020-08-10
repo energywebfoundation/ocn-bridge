@@ -1,19 +1,18 @@
 import { assert } from "chai"
 import { Server } from "http"
-import "mocha"
 import request from "supertest"
 import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testTariffs } from "../../../data/test-data"
-import { startNode } from "../../../mock/ocn-node"
+import { startNode, stopNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../../src/models"
 
 describe("OCPI Tariffs Controller", () => {
 
-    let app: Server
-
+    let bridge: IBridge
     let ocnNode: Server
 
     beforeEach(async () => {
@@ -21,7 +20,7 @@ describe("OCPI Tariffs Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -40,15 +39,15 @@ describe("OCPI Tariffs Controller", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
-        await stopBridge(ocnNode)
+        await stopBridge(bridge)
+        await stopNode(ocnNode)
     })
 
     context("Sender interface", () => {
 
         it("should return list of tariffs", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .get("/ocpi/sender/2.2/tariffs")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")

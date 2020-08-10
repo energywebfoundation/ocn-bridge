@@ -15,7 +15,6 @@
 */
 import * as bodyParser from "body-parser"
 import express, { Router } from "express"
-import { Server } from "http"
 import morgan from "morgan"
 import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
 import { RegistrationService } from "../services/registration.service"
@@ -29,6 +28,8 @@ import { LocationsController } from "./ocpi/v2_2/locations.controller"
 import { SessionsController } from "./ocpi/v2_2/sessions.controller"
 import { TariffsController } from "./ocpi/v2_2/tariffs.controller"
 import { VersionsController } from "./ocpi/versions.controller"
+import { IBridge } from "../models"
+import { PushService } from "../services"
 
 // set basic home route
 const homeController = Router()
@@ -41,7 +42,7 @@ homeController.get("/", async (_, res) => {
  * @param options an object of configuration options (must implement IBridgeConfigurationOptions)
  * @returns a promise resolving with the newly created http.Server
  */
-export const startBridge = async (options: IBridgeConfigurationOptions): Promise<Server> => {
+export const startBridge = async (options: IBridgeConfigurationOptions): Promise<IBridge> => {
 
     let signerService: SignerService | undefined
     if (options.signatures) {
@@ -84,7 +85,10 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
                 )
             }
 
-            err ? reject(err) : resolve(server)
+            err ? reject(err) : resolve({
+                server,
+                pushService: new PushService(options.pluggableDB, options.roles[0], signerService)
+            })
         })
     })
 }
@@ -93,9 +97,9 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
  * Stop a http.Server
  * @param app the http.Server created during bootstrapping
  */
-export const stopBridge = async (app: Server) => {
+export const stopBridge = async (bridge: IBridge) => {
     return new Promise((resolve, reject) => {
-        app.close((err?: Error) => {
+        bridge.server.close((err?: Error) => {
             err ? reject(err) : resolve()
         })
     })

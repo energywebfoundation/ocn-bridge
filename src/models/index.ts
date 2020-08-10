@@ -1,3 +1,4 @@
+export * from "./bridge"
 export * from "./bridgeConfigurationOptions"
 export * from "./pluggableAPI"
 export * from "./pluggableDB"

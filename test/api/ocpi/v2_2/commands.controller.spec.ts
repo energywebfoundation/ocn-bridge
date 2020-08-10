@@ -2,22 +2,21 @@ import { assert } from "chai"
 import { EventEmitter } from "events"
 import { Request } from "express"
 import { Server } from "http"
-import "mocha"
 import request from "supertest"
 import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testToken } from "../../../data/test-data"
-import { startNode } from "../../../mock/ocn-node"
+import { startNode, stopNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../../src/models"
 
 describe("OCPI Commands Controller", () => {
 
     let events: EventEmitter
 
-    let app: Server
-
+    let bridge: IBridge
     let ocnNode: Server
 
     beforeEach(async () => {
@@ -27,7 +26,7 @@ describe("OCPI Commands Controller", () => {
 
         events = new EventEmitter()
 
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -46,15 +45,15 @@ describe("OCPI Commands Controller", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
-        await stopBridge(ocnNode)
+        await stopBridge(bridge)
+        await stopNode(ocnNode)
     })
 
     context("Sender interface", () => {
 
         it("should return 1000", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/sender/2.2/commands/START_SESSION/1234")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
@@ -84,7 +83,7 @@ describe("OCPI Commands Controller", () => {
 
         it("should return CommandResponse and send async CommandResult on START_SESSION", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/receiver/2.2/commands/START_SESSION")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
@@ -128,7 +127,7 @@ describe("OCPI Commands Controller", () => {
 
         it("should return CommandResponse and send async CommandResult on STOP_SESSION", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/receiver/2.2/commands/STOP_SESSION")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
@@ -172,7 +171,7 @@ describe("OCPI Commands Controller", () => {
 
         it("should return NOT_SUPPORTED on CANCEL_RESERVATION", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/receiver/2.2/commands/CANCEL_RESERVATION")
                 .set("Authorization", "Token token-b")
                 .send({
@@ -196,7 +195,7 @@ describe("OCPI Commands Controller", () => {
 
         it("should return NOT_SUPPORTED on RESERVE_NOW", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/receiver/2.2/commands/RESERVE_NOW")
                 .set("Authorization", "Token token-b")
                 .send({
@@ -222,7 +221,7 @@ describe("OCPI Commands Controller", () => {
 
         it("should return NOT_SUPPORTED on UNLOCK_CONNECTOR", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/receiver/2.2/commands/UNLOCK_CONNECTOR")
                 .set("Authorization", "Token token-b")
                 .send({

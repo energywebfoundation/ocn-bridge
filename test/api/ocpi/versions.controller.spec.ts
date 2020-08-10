@@ -1,6 +1,4 @@
 import { assert } from "chai"
-import { Server } from "http"
-import "mocha"
 import request from "supertest"
 import { startBridge, stopBridge } from "../../../src/api/index"
 import { ModuleImplementation } from "../../../src/models/bridgeConfigurationOptions"
@@ -8,17 +6,18 @@ import { testRoles } from "../../data/test-data"
 import { PluggableAPIStub } from "../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../src/models"
 
 describe("OCPI Versions Controller", () => {
 
-    let app: Server
+    let bridge: IBridge
 
     beforeEach(async () => {
         const db = new PluggableDBStub()
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000/",
             ocnNodeURL: "http::/localhost:3001",
             roles: testRoles,
@@ -31,11 +30,11 @@ describe("OCPI Versions Controller", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
+        await stopBridge(bridge)
     })
 
     it("should return list of versions", (done) => {
-        request(app)
+        request(bridge.server)
             .get("/ocpi/versions")
             .set("Authorization", "Token token-b")
             .expect(200)
@@ -57,7 +56,7 @@ describe("OCPI Versions Controller", () => {
     })
 
     it("should return 2.2 endpoints", (done) => {
-        request(app)
+        request(bridge.server)
             .get("/ocpi/versions/2.2")
             .set("Authorization", "Token token-b")
             .expect(200)

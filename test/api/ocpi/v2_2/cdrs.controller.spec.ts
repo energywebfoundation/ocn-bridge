@@ -1,19 +1,18 @@
 import { assert } from "chai"
 import { Server } from "http"
-import "mocha"
 import request from "supertest"
 import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testCdr, testCdrList, testRoles } from "../../../data/test-data"
-import { startNode } from "../../../mock/ocn-node"
+import { startNode, stopNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../../src/models"
 
 describe("OCPI Cdrs Controller", () => {
 
-    let app: Server
-
+    let bridge: IBridge
     let ocnNode: Server
 
     beforeEach(async () => {
@@ -21,7 +20,7 @@ describe("OCPI Cdrs Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startBridge({
+        bridge = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -40,39 +39,39 @@ describe("OCPI Cdrs Controller", () => {
     })
 
     afterEach(async () => {
-        await stopBridge(app)
-        await stopBridge(ocnNode)
+        await stopBridge(bridge)
+        await stopNode(ocnNode)
     })
 
     context("Receiver interface", () => {
 
         it("should return stored cdr on GET cdrs", (done) => {
 
-            request(app)
-            .get("/ocpi/receiver/2.2/cdrs/DE/CPO/55")
-            .set("Authorization", "Token token-b")
-            .set("X-Request-ID", "123")
-            .set("X-Correlation-ID", "456")
-            .set("OCPI-From-Country-Code", "DE")
-            .set("OCPI-From-Party-Id", "MSP")
-            .set("OCPI-To-Country-Code", "DE")
-            .set("OCPI-To-Party-Id", "CPO")
-            .send()
-            .expect(200)
-            .end((err, result) => {
-                if (err) {
-                    return done(err)
-                }
+            request(bridge.server)
+                .get("/ocpi/receiver/2.2/cdrs/DE/CPO/55")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send()
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
 
-                assert.equal(result.body.status_code, 1000)
-                assert.deepEqual(result.body.data, testCdr)
-                done()
-            })
+                    assert.equal(result.body.status_code, 1000)
+                    assert.deepEqual(result.body.data, testCdr)
+                    done()
+                })
         })
 
         it("should return 1000 status and location header on POST cdrs", (done) => {
 
-            request(app)
+            request(bridge.server)
                 .post("/ocpi/receiver/2.2/cdrs")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
@@ -100,25 +99,25 @@ describe("OCPI Cdrs Controller", () => {
 
         it("should return cdrs list", (done) => {
 
-            request(app)
-            .get("/ocpi/sender/2.2/cdrs")
-            .set("Authorization", "Token token-b")
-            .set("X-Request-ID", "123")
-            .set("X-Correlation-ID", "456")
-            .set("OCPI-From-Country-Code", "DE")
-            .set("OCPI-From-Party-Id", "MSP")
-            .set("OCPI-To-Country-Code", "DE")
-            .set("OCPI-To-Party-Id", "CPO")
-            .send()
-            .expect(200)
-            .end((err, result) => {
-                if (err) {
-                    return done(err)
-                }
-                assert.equal(result.body.status_code, 1000)
-                assert.deepEqual(result.body.data, testCdrList)
-                done()
-            })
+            request(bridge.server)
+                .get("/ocpi/sender/2.2/cdrs")
+                .set("Authorization", "Token token-b")
+                .set("X-Request-ID", "123")
+                .set("X-Correlation-ID", "456")
+                .set("OCPI-From-Country-Code", "DE")
+                .set("OCPI-From-Party-Id", "MSP")
+                .set("OCPI-To-Country-Code", "DE")
+                .set("OCPI-To-Party-Id", "CPO")
+                .send()
+                .expect(200)
+                .end((err, result) => {
+                    if (err) {
+                        return done(err)
+                    }
+                    assert.equal(result.body.status_code, 1000)
+                    assert.deepEqual(result.body.data, testCdrList)
+                    done()
+                })
         })
     })
 
