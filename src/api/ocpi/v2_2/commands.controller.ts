@@ -21,7 +21,7 @@ import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/command
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
-import { setResponseHeaders } from "../../../tools/tools"
+import { setResponseHeaders, toOcpiParty } from "../../../tools/tools"
 import { CustomisableController } from "../advice/customisable"
 import { SignerService } from "../../../services/signer.service"
 
@@ -68,7 +68,10 @@ export class CommandsController extends CustomisableController {
             router.post("/receiver/2.2/commands/CANCEL_RESERVATION", async (req, res, next) => {
                 try {
                     // await initial response to cancel reservation request
-                    const response = await pluggableAPI.commands!.receiver!.cancelReservation(req.body.reservation_id)
+                    const response = await pluggableAPI.commands!.receiver!.cancelReservation(
+                        req.body.reservation_id,
+                        toOcpiParty(req.headers)
+                    )
                     // send the initial response
                     res.send(OcpiResponse.withData(response.commandResponse))
                     // send the async response from the charge point
@@ -86,7 +89,10 @@ export class CommandsController extends CustomisableController {
                     // separate response_url from rest of body
                     const { responseURL, out: reserveRequest } = this.extractResponseURL(req.body)
                     // await initial response to reserve location/evse/connector
-                    const response = await pluggableAPI.commands!.receiver!.reserveNow(reserveRequest)
+                    const response = await pluggableAPI.commands!.receiver!.reserveNow(
+                        reserveRequest,
+                        toOcpiParty(req.headers)
+                    )
                     // send initial response
                     res.send(OcpiResponse.withData(response.commandResponse))
                     // send the async response from the charge point
@@ -106,10 +112,7 @@ export class CommandsController extends CustomisableController {
                     // await initial response from CPO
                     const response = await pluggableAPI.commands!.receiver!.startSession(
                         startRequest,
-                        {
-                            country_code: req.headers["ocpi-from-country-code"] as string,
-                            party_id: req.headers["ocpi-from-party-id"] as string
-                        }
+                        toOcpiParty(req.headers)
                     )
                     // send the initial response
                     res.send(OcpiResponse.withData(response.commandResponse))
@@ -126,10 +129,10 @@ export class CommandsController extends CustomisableController {
             router.post("/receiver/2.2/commands/STOP_SESSION", async (req, res, next) => {
                 try {
                     // await the initial repsonse to stop a session
-                    const response = await pluggableAPI.commands!.receiver!.stopSession(req.body.session_id, {
-                        country_code: req.headers["ocpi-from-country-code"] as string,
-                        party_id: req.headers["ocpi-from-party-id"] as string
-                    })
+                    const response = await pluggableAPI.commands!.receiver!.stopSession(
+                        req.body.session_id, 
+                        toOcpiParty(req.headers)
+                    )
                     // send the inital response
                     res.send(OcpiResponse.withData(response.commandResponse))
                     // send the async response from the charge point
@@ -148,7 +151,8 @@ export class CommandsController extends CustomisableController {
                     const response = await pluggableAPI.commands!.receiver!.unlockConnector(
                         req.body.location_id,
                         req.body.evse_uid,
-                        req.body.connector_id
+                        req.body.connector_id,
+                        toOcpiParty(req.headers)
                     )
                     // send the initial response
                     res.send(OcpiResponse.withData(response.commandResponse))

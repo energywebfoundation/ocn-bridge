@@ -49,11 +49,11 @@ export interface IPluggableAPI {
             asyncResult(command: string, uid: string, result: ICommandResult): void
         },
         receiver?: {
-            cancelReservation(reservationID: string): Promise<IAsyncCommand>
-            reserveNow(request: IReserveNow): Promise<IAsyncCommand>
+            cancelReservation(reservationID: string, recipient: IOcpiParty): Promise<IAsyncCommand>
+            reserveNow(request: IReserveNow, recipient: IOcpiParty): Promise<IAsyncCommand>
             startSession(request: IStartSession, recipient: IOcpiParty): Promise<IAsyncCommand>
             stopSession(sessionID: string, recipient: IOcpiParty): Promise<IAsyncCommand>
-            unlockConnector(locationID: string, evseUID: string, connectorID: string): Promise<IAsyncCommand>
+            unlockConnector(locationID: string, evseUID: string, connectorID: string, recipient: IOcpiParty): Promise<IAsyncCommand>
         }
     }
     locations?: {

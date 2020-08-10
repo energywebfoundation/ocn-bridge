@@ -16,6 +16,7 @@
 import { IncomingHttpHeaders } from "http"
 import * as uuid from "uuid"
 import { IHeaders, IPaginationParams } from "../models/ocpi/common"
+import { IOcpiParty } from "../services/push.service"
 
 export const stripVersions = (url: string): string => {
     if (url.endsWith("/ocpi/versions")) {
@@ -58,4 +59,11 @@ export const formatPaginationParams = (params: any): IPaginationParams => {
         pagination.limit = parseInt(params.limit, 10)
     }
     return pagination
+}
+
+export const toOcpiParty = (headers: IncomingHttpHeaders): IOcpiParty => {
+    return {
+        country_code: headers["ocpi-to-country-code"] as string,
+        party_id: headers["ocpi-to-party-id"] as string,
+    }
 }
