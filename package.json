@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@shareandcharge/ocn-notary": "^1.0.0",
-    "@shareandcharge/ocn-registry": "^1.0.0",
+    "@shareandcharge/ocn-registry": "^1.1.0-rc1.amended",
     "body-parser": "^1.19.0",
     "ethers": "^4.0.46",
     "express": "^4.17.1",

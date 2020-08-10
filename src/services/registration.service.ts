@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-import { Role } from "@shareandcharge/ocn-registry/dist/types";
+import { Role } from "@shareandcharge/ocn-registry/dist/lib/types";
 import { utils } from "ethers";
 import fetch from "node-fetch";
 import * as url from "url";

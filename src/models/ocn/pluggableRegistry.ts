@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-import { Role } from "@shareandcharge/ocn-registry/dist/types";
+import { Role } from "@shareandcharge/ocn-registry/dist/lib/types";
 
 export interface IPluggableRegistry {
     getNode(countryCode: string, partyID: string): Promise<{ operator: string, url: string }>

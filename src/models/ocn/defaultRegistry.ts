@@ -14,16 +14,18 @@
     limitations under the License.
 */
 
-import { Registry } from "@shareandcharge/ocn-registry"
-import { Role } from "@shareandcharge/ocn-registry/dist/types";
+import { Registry, Permissions } from "@shareandcharge/ocn-registry"
+import { Role } from "@shareandcharge/ocn-registry/dist/lib/types";
 import { IPluggableRegistry } from "./pluggableRegistry";
 
 export class DefaultRegistry implements IPluggableRegistry {
 
-    private registry: Registry
+    protected registry: Registry
+    protected permissions: Permissions
 
     constructor(environment: string, private signer?: string, private spender?: string) {
         this.registry = new Registry(environment, this.spender || this.signer)
+        this.permissions = new Permissions(environment, this.spender || this.signer)
     }
 
     public async getNode(countryCode: string, partyID: string): Promise<{ operator: string; url: string; }> {
