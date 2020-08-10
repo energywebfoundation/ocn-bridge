@@ -18,7 +18,7 @@ import { IChargeDetailRecord } from "./ocpi/cdrs";
 import { IAsyncCommand, ICommandResult } from "./ocpi/commands";
 import { IPaginationParams } from "./ocpi/common";
 import { IConnector, IEvse, ILocation } from "./ocpi/locations";
-import { ISession } from "./ocpi/session";
+import { ISession } from "./ocpi/sessions";
 import { ITariff } from "./ocpi/tariffs";
 import { IToken } from "./ocpi/tokens";
 

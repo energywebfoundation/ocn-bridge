@@ -2,7 +2,7 @@ import { assert } from "chai"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
-import { startServer, stopServer } from "../../../../src/api/index"
+import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testSession, testSessionList } from "../../../data/test-data"
 import { startNode } from "../../../mock/ocn-node"
@@ -21,7 +21,7 @@ describe("OCPI Sessions Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startServer({
+        app = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -40,8 +40,8 @@ describe("OCPI Sessions Controller", () => {
     })
 
     afterEach(async () => {
-        await stopServer(app)
-        await stopServer(ocnNode)
+        await stopBridge(app)
+        await stopBridge(ocnNode)
     })
 
     context("Receiver interface", () => {

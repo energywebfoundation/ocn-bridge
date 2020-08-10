@@ -1,7 +1,7 @@
 import { IChargeDetailRecord } from "../../src/models/ocpi/cdrs";
 import { ICredentials, IRole } from "../../src/models/ocpi/credentials";
 import { ILocation } from "../../src/models/ocpi/locations";
-import { ISession } from "../../src/models/ocpi/session";
+import { ISession } from "../../src/models/ocpi/sessions";
 import { ITariff } from "../../src/models/ocpi/tariffs";
 import { IToken } from "../../src/models/ocpi/tokens";
 

@@ -2,7 +2,7 @@ import { assert } from "chai"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
-import { startServer, stopServer } from "../../../src/api/index"
+import { startBridge, stopBridge } from "../../../src/api/index"
 import { ModuleImplementation } from "../../../src/models/bridgeConfigurationOptions"
 import { testRoles } from "../../data/test-data"
 import { PluggableAPIStub } from "../../stubs/pluggableAPI.stub"
@@ -18,7 +18,7 @@ describe("OCPI Versions Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startServer({
+        app = await startBridge({
             publicBridgeURL: "http://localhost:3000/",
             ocnNodeURL: "http::/localhost:3001",
             roles: testRoles,
@@ -31,7 +31,7 @@ describe("OCPI Versions Controller", () => {
     })
 
     afterEach(async () => {
-        await stopServer(app)
+        await stopBridge(app)
     })
 
     it("should return list of versions", (done) => {

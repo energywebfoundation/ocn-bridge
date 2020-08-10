@@ -15,7 +15,7 @@
 */
 import { IDisplayText } from "./common"
 import { IEnergyMix } from "./locations"
-import { IPrice } from "./session"
+import { IPrice } from "./sessions"
 
 export interface ITariff {
     country_code: string

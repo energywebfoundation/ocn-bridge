@@ -21,7 +21,7 @@ import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/command
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
-import { setResponseHeaders, toOcpiParty } from "../../../tools/tools"
+import { setResponseHeaders, toOcpiParty } from "../../../tools"
 import { CustomisableController } from "../advice/customisable"
 import { SignerService } from "../../../services/signer.service"
 

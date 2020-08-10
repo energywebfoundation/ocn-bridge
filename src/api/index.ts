@@ -20,7 +20,7 @@ import morgan from "morgan"
 import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
 import { RegistrationService } from "../services/registration.service"
 import { SignerService } from "../services/signer.service"
-import { stripVersions } from "../tools/tools"
+import { stripVersions } from "../tools"
 import { hasValidSignature, isAuthorized, handleOcpiErrors } from "./ocpi/middleware/middleware"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
@@ -41,7 +41,7 @@ homeController.get("/", async (_, res) => {
  * @param options an object of configuration options (must implement IBridgeConfigurationOptions)
  * @returns a promise resolving with the newly created http.Server
  */
-export const startServer = async (options: IBridgeConfigurationOptions): Promise<Server> => {
+export const startBridge = async (options: IBridgeConfigurationOptions): Promise<Server> => {
 
     let signerService: SignerService | undefined
     if (options.signatures) {
@@ -93,7 +93,7 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
  * Stop a http.Server
  * @param app the http.Server created during bootstrapping
  */
-export const stopServer = async (app: Server) => {
+export const stopBridge = async (app: Server) => {
     return new Promise((resolve, reject) => {
         app.close((err?: Error) => {
             err ? reject(err) : resolve()

@@ -17,7 +17,7 @@ import { Router } from "express"
 import { IModules } from "../../../models/bridgeConfigurationOptions"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
-import { formatPaginationParams } from "../../../tools/tools"
+import { formatPaginationParams } from "../../../tools"
 import { CustomisableController } from "../advice/customisable"
 import { SignerService } from "../../../services/signer.service"
 

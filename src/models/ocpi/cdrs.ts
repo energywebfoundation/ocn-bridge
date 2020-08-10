@@ -14,7 +14,7 @@
     limitations under the License.
 */
 import { connectorFormat, connectorPowerType, connectorStandard, IGeoLocation } from "./locations";
-import { authMethod, ICdrToken, IChargingPeriod, IPrice } from "./session";
+import { authMethod, ICdrToken, IChargingPeriod, IPrice } from "./sessions";
 import { ITariff } from "./tariffs";
 
 export interface IChargeDetailRecord {

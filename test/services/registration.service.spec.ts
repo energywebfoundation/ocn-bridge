@@ -1,7 +1,7 @@
 import { assert } from "chai"
 import { EventEmitter } from "events"
 import "mocha"
-import { stopServer } from "../../src/api/index"
+import { stopBridge } from "../../src/api/index"
 import { IPluggableRegistry } from "../../src/models/ocn/pluggableRegistry"
 import { registryListing } from "../../src/models/ocn/registry"
 import { IPluggableDB } from "../../src/models/pluggableDB"
@@ -42,7 +42,7 @@ describe("Registration Service", () => {
 
         assert.deepEqual(got, want)
 
-        await stopServer(ocnNode)
+        await stopBridge(ocnNode)
     })
 
     context("isListedInRegistry", () => {
@@ -103,7 +103,7 @@ describe("Registration Service", () => {
 
         const got = await modifiedRegistrationService.isConnectedToNode()
 
-        await stopServer(ocnNode)
+        await stopBridge(ocnNode)
 
         assert.equal(got, true)
     })
@@ -111,7 +111,7 @@ describe("Registration Service", () => {
     it("getNodeEndpoints", async () => {
         const ocnNode = await startNode(3001)
         await registrationService.getNodeEndpoints("http://localhost:3001/ocpi/versions", "token-a")
-        await stopServer(ocnNode)
+        await stopBridge(ocnNode)
         const got = await db.getEndpoint("commands", "SENDER")
         assert.equal(got, "http://localhost:3001/ocpi/sender/2.2/commands")
     })
@@ -144,7 +144,7 @@ describe("Registration Service", () => {
 
             await modifiedRegistrationService.connectToNode(testCredentials, "token-a")
 
-            await stopServer(ocnNode)
+            await stopBridge(ocnNode)
 
             const tokenB = await modifiedDB.getTokenB()
             const tokenC = await modifiedDB.getTokenC()

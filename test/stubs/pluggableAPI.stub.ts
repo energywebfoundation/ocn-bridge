@@ -1,7 +1,7 @@
 import { IChargeDetailRecord } from "../../src/models/ocpi/cdrs";
 import { CommandResponseType, CommandResultType, IAsyncCommand, ICommandResult } from "../../src/models/ocpi/commands";
 import { IConnector, IEvse, ILocation } from "../../src/models/ocpi/locations";
-import { ISession } from "../../src/models/ocpi/session";
+import { ISession } from "../../src/models/ocpi/sessions";
 import { ITariff } from "../../src/models/ocpi/tariffs";
 import { IPaginationResponse, IPluggableAPI } from "../../src/models/pluggableAPI";
 import { testCdr, testCdrList, testLocations, testSessionList, testTariffs } from "../data/test-data";
