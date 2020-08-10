@@ -46,7 +46,7 @@ export interface IPaginationResponse<T> {
 export interface IPluggableAPI {
     commands?: {
         sender?: {
-            asyncResult(command: string, uid: string, result: ICommandResult): void
+            asyncResult(command: string, uid: string, result: ICommandResult): Promise<void>
         },
         receiver?: {
             cancelReservation(reservationID: string, recipient: IOcpiParty): Promise<IAsyncCommand>
@@ -58,7 +58,6 @@ export interface IPluggableAPI {
     }
     locations?: {
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
             getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ILocation[]>>
             getObject(id: string): Promise<ILocation | undefined>
             getEvse(locationID: string, evseUID: string): Promise<IEvse | undefined>
@@ -67,26 +66,23 @@ export interface IPluggableAPI {
     }
     tariffs?: {
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
             getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ITariff[]>>
         }
     }
     sessions?: {
         receiver?: {
-            update(session: ISession): void
+            update(session: ISession): Promise<void>
         }
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
             getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
         }
     }
     cdrs?: {
         receiver?: {
-            get(id: string): Promise<IChargeDetailRecord | undefined>
-            create(cdr: IChargeDetailRecord): void
+            get(countryCode: string, partyId: string, id: string): Promise<IChargeDetailRecord | undefined>
+            create(cdr: IChargeDetailRecord): Promise<void>
         }
         sender?: {
-            // TODO: needs to return Pair<ILocation[], Headers>
             getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<IChargeDetailRecord[]>>
         }
     }

@@ -49,7 +49,7 @@ describe("OCPI Cdrs Controller", () => {
         it("should return stored cdr on GET cdrs", (done) => {
 
             request(app)
-            .get("/ocpi/receiver/2.2/cdrs/55")
+            .get("/ocpi/receiver/2.2/cdrs/DE/CPO/55")
             .set("Authorization", "Token token-b")
             .set("X-Request-ID", "123")
             .set("X-Correlation-ID", "456")

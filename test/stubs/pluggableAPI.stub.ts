@@ -35,7 +35,7 @@ const asyncCommandAccepted = {
 export class PluggableAPIStub implements IPluggableAPI {
     public commands = {
         sender: {
-            asyncResult(): void {
+            async asyncResult(): Promise<void> {
                 return
             }
         },
@@ -85,7 +85,7 @@ export class PluggableAPIStub implements IPluggableAPI {
     }
     public sessions = {
         receiver: {
-            update(): void {
+            async update(): Promise<void> {
                 return
             }
         },
@@ -100,7 +100,7 @@ export class PluggableAPIStub implements IPluggableAPI {
             async get(): Promise<IChargeDetailRecord> {
                 return testCdr
             },
-            create(): void {
+            async create(): Promise<void> {
                 return
             }
         },

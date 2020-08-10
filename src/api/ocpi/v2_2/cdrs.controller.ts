@@ -35,9 +35,13 @@ export class CdrsController extends CustomisableController {
             /**
              * GET cdr
              */
-            router.get("/receiver/2.2/cdrs/:id", async (req, res, next) => {
+            router.get("/receiver/2.2/cdrs/:country_code/:party_id/:id", async (req, res, next) => {
                 try {
-                    const cdr = await pluggableAPI.cdrs!.receiver!.get(req.params.id)
+                    const cdr = await pluggableAPI.cdrs!.receiver!.get(
+                        req.params.country_code,
+                        req.params.party_id,    
+                        req.params.id
+                    )
                     let statusCode: number
                     let body: OcpiResponse
     
