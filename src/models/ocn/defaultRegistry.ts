@@ -20,8 +20,8 @@ import { IPluggableRegistry } from "./pluggableRegistry";
 
 export class DefaultRegistry implements IPluggableRegistry {
 
-    protected registry: Registry
-    protected permissions: Permissions
+    public registry: Registry
+    public permissions: Permissions
 
     constructor(environment: string, private signer?: string, private spender?: string) {
         this.registry = new Registry(environment, this.spender || this.signer)
