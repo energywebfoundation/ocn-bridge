@@ -20,7 +20,7 @@ import { IPaginationParams } from "./ocpi/common";
 import { IConnector, IEvse, ILocation } from "./ocpi/locations";
 import { ISession } from "./ocpi/sessions";
 import { ITariff } from "./ocpi/tariffs";
-import { IToken } from "./ocpi/tokens";
+import { IToken, ITokenType, ILocationReferences, IAuthorizationInfo, IUnauthorizedToken } from "./ocpi/tokens";
 
 export interface IReserveNow {
     token: IToken
@@ -66,7 +66,7 @@ export interface IPluggableAPI {
     }
     tariffs?: {
         sender?: {
-            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ITariff[]>>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ITariff[]>>
         }
     }
     sessions?: {
@@ -74,7 +74,7 @@ export interface IPluggableAPI {
             update(session: ISession): Promise<void>
         }
         sender?: {
-            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
         }
     }
     cdrs?: {
@@ -83,7 +83,14 @@ export interface IPluggableAPI {
             create(cdr: IChargeDetailRecord): Promise<void>
         }
         sender?: {
-            getList(IPaginationParams?: IPaginationParams): Promise<IPaginationResponse<IChargeDetailRecord[]>>
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<IChargeDetailRecord[]>>
+        }
+    },
+    tokens?: {
+        sender?: {
+            getList(pagination?: IPaginationParams): Promise<IPaginationResponse<IToken[]>>
+            authorize(tokenUid: string, type: ITokenType, location: ILocationReferences): Promise<IAuthorizationInfo | IUnauthorizedToken>
+
         }
     }
 }

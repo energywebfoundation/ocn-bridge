@@ -16,11 +16,11 @@
 import * as bodyParser from "body-parser"
 import express, { Router } from "express"
 import morgan from "morgan"
-import { IBridgeConfigurationOptions } from "../models/bridgeConfigurationOptions"
-import { RegistrationService } from "../services/registration.service"
-import { SignerService } from "../services/signer.service"
+import { IBridge, IBridgeConfigurationOptions } from "../models"
+import { RegistrationService, RequestService, SignerService } from "../services"
 import { stripVersions } from "../tools"
 import { hasValidSignature, isAuthorized, handleOcpiErrors } from "./ocpi/middleware/middleware"
+import pkg from "../../package.json"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
@@ -28,13 +28,12 @@ import { LocationsController } from "./ocpi/v2_2/locations.controller"
 import { SessionsController } from "./ocpi/v2_2/sessions.controller"
 import { TariffsController } from "./ocpi/v2_2/tariffs.controller"
 import { VersionsController } from "./ocpi/versions.controller"
-import { IBridge } from "../models"
-import { RequestService } from "../services"
+import { TokensController } from "./ocpi/v2_2/tokens.controller"
 
 // set basic home route
 const homeController = Router()
 homeController.get("/", async (_, res) => {
-    res.send("OCN Bridge v0.1.0")
+    res.send(`OCN Bridge v${pkg.version}`)
 })
 
 /**
@@ -58,7 +57,6 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
     }
 
     app.use(homeController)
-
     app.use(
         "/ocpi/",
         isAuthorized(options.pluggableDB, signerService),
@@ -69,6 +67,7 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
         TariffsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         SessionsController.getRoutes(options.pluggableAPI, options.modules, signerService),
         CdrsController.getRoutes(options.publicBridgeURL, options.pluggableAPI, options.modules, signerService),
+        TokensController.getRoutes(options.pluggableAPI, options.modules, signerService),
         handleOcpiErrors(signerService)
     )
 

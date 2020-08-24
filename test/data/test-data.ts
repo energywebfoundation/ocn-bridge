@@ -3,7 +3,7 @@ import { ICredentials, IRole } from "../../src/models/ocpi/credentials";
 import { ILocation } from "../../src/models/ocpi/locations";
 import { ISession } from "../../src/models/ocpi/sessions";
 import { ITariff } from "../../src/models/ocpi/tariffs";
-import { IToken } from "../../src/models/ocpi/tokens";
+import { IToken, IAuthorizationInfo } from "../../src/models/ocpi/tokens";
 
 export const testRoles: IRole[] = [
     {
@@ -289,3 +289,10 @@ export const testSessionList: ISession[] = [{
     status: "ACTIVE",
     last_updated: new Date().toISOString()
 }]
+
+export const testTokens: IToken[] = [testToken, testToken, testToken]
+
+export const testAuthorizationInfo: IAuthorizationInfo = {
+    allowed: "ALLOWED",
+    token: testToken
+}

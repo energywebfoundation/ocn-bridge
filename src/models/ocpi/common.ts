@@ -14,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-export type identifier = "commands" | "locations" | "tariffs" | "sessions" | "cdrs"
+export type identifier = "commands" | "locations" | "tariffs" | "sessions" | "cdrs" | "tokens"
 export type role = "SENDER" | "RECEIVER"
 
 export interface IEndpoint {
