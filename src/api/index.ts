@@ -22,6 +22,7 @@ import { RegistrationService } from "../services/registration.service"
 import { SignerService } from "../services/signer.service"
 import { stripVersions } from "../tools/tools"
 import { hasValidSignature, isAuthorized, handleOcpiErrors } from "./ocpi/middleware/middleware"
+import pkg from "../../package.json"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
@@ -34,7 +35,7 @@ import { TokensController } from "./ocpi/v2_2/tokens.controller"
 // set basic home route
 const homeController = Router()
 homeController.get("/", async (_, res) => {
-    res.send("OCN Bridge v0.1.0")
+    res.send(`OCN Bridge v${pkg.version}`)
 })
 
 /**
@@ -58,7 +59,6 @@ export const startServer = async (options: IBridgeConfigurationOptions): Promise
     }
 
     app.use(homeController)
-
     app.use(
         "/ocpi/",
         isAuthorized(options.pluggableDB, signerService),

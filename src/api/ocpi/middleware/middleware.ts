@@ -44,6 +44,11 @@ export const isAuthorized = (pluggableDB: IPluggableDB, signer?: SignerService) 
 
 export const hasValidSignature = (signer?: SignerService) => {
     return async (req: Request, res: Response, next: NextFunction) => {
+        // skip validation for versions information endpoints 
+        console.log("evaluating path:", req.path)
+        if (req.path === "/ocpi/versions") {
+           return next()
+        }
         if (signer) {
             if (!req.headers["ocn-signature"]) {
                 const body = OcpiResponse.withMessage(2001, "Missing required OCN-Signature header")
