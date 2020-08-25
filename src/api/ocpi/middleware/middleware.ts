@@ -45,8 +45,7 @@ export const isAuthorized = (pluggableDB: IPluggableDB, signer?: SignerService) 
 export const hasValidSignature = (signer?: SignerService) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         // skip validation for versions information endpoints 
-        console.log("evaluating path:", req.path)
-        if (req.path === "/ocpi/versions") {
+        if (req.path.startsWith("/versions")) {
            return next()
         }
         if (signer) {

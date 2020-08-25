@@ -20,7 +20,6 @@ import { IBridge, IBridgeConfigurationOptions } from "../models"
 import { RegistrationService, RequestService, SignerService } from "../services"
 import { stripVersions } from "../tools"
 import { hasValidSignature, isAuthorized, handleOcpiErrors } from "./ocpi/middleware/middleware"
-import pkg from "../../package.json"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
 import { CommandsController } from "./ocpi/v2_2/commands.controller"
@@ -30,10 +29,13 @@ import { TariffsController } from "./ocpi/v2_2/tariffs.controller"
 import { VersionsController } from "./ocpi/versions.controller"
 import { TokensController } from "./ocpi/v2_2/tokens.controller"
 
+// tslint:disable-next-line
+const version = require("../../package.json").version
+
 // set basic home route
 const homeController = Router()
 homeController.get("/", async (_, res) => {
-    res.send(`OCN Bridge v${pkg.version}`)
+    res.send(`OCN Bridge v${version}`)
 })
 
 /**

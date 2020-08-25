@@ -35,7 +35,7 @@ export class DefaultRegistry implements IPluggableRegistry {
 
     public async setParty(countryCode: string, partyID: string, roles: Role[], operator: string): Promise<boolean> {
         if (!this.signer) {
-            throw Error("No SIGNER_KEY environment variable provided.")
+            throw Error("DefaultRegistry has no signer. Unable to set party in Registry.")
         }
         if (this.spender) {
             await this.registry.setPartyRaw(countryCode, partyID, roles, operator, this.signer)

@@ -2,17 +2,18 @@ import { assert } from "chai"
 import { Server } from "http"
 import "mocha"
 import request from "supertest"
-import { startServer, stopServer } from "../../../../src/api/index"
+import { startBridge, stopBridge } from "../../../../src/api/index"
 import { ModuleImplementation } from "../../../../src/models/bridgeConfigurationOptions"
 import { testRoles, testTokens, testAuthorizationInfo } from "../../../data/test-data"
-import { startNode } from "../../../mock/ocn-node"
+import { startNode, stopNode } from "../../../mock/ocn-node"
 import { PluggableAPIStub } from "../../../stubs/pluggableAPI.stub"
 import { PluggableDBStub } from "../../../stubs/pluggableDB.stub"
 import { PluggableRegistryStub } from "../../../stubs/pluggableRegistry.stub"
+import { IBridge } from "../../../../src/models"
 
 describe("OCPI Tokens Controller", () => {
 
-    let app: Server
+    let app: IBridge
 
     let ocnNode: Server
 
@@ -21,7 +22,7 @@ describe("OCPI Tokens Controller", () => {
         db.setTokenB("token-b")
         db.setTokenC("token-c")
 
-        app = await startServer({
+        app = await startBridge({
             publicBridgeURL: "http://localhost:3000",
             ocnNodeURL: "http://localhost:3001",
             roles: testRoles,
@@ -40,15 +41,15 @@ describe("OCPI Tokens Controller", () => {
     })
 
     afterEach(async () => {
-        await stopServer(app)
-        await stopServer(ocnNode)
+        await stopBridge(app)
+        await stopNode(ocnNode)
     })
 
     context("Sender interface", () => {
 
         it("should return list of tokens", (done) => {
 
-            request(app)
+            request(app.server)
                 .get("/ocpi/sender/2.2/tokens")
                 .set("Authorization", "Token token-b")
                 .set("X-Request-ID", "123")
@@ -73,7 +74,7 @@ describe("OCPI Tokens Controller", () => {
 
     it("should return real-time authorization info", (done) => {
 
-        request(app)
+        request(app.server)
             .post("/ocpi/sender/2.2/tokens/666/authorize")
             .set("Authorization", "Token token-b")
             .set("X-Request-ID", "123")
