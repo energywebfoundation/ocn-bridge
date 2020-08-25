@@ -30,6 +30,7 @@ export interface IHeaders {
     "OCPI-From-Party-Id": string
     "OCPI-To-Country-Code": string
     "OCPI-To-Party-Id": string
+    "OCN-Signature"?: string
 }
 
 export interface IPaginationParams {

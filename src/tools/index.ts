@@ -15,8 +15,9 @@
 */
 import { IncomingHttpHeaders } from "http"
 import * as uuid from "uuid"
-import { IHeaders, IPaginationParams } from "../models/ocpi/common"
+import { IPaginationParams } from "../models/ocpi/common"
 import { IOcpiParty } from "../services/request.service"
+import { ISignableHeaders } from "@shareandcharge/ocn-notary/dist/ocpi-request.interface"
 
 export const stripVersions = (url: string): string => {
     if (url.endsWith("/ocpi/versions")) {
@@ -30,14 +31,13 @@ export const stripVersions = (url: string): string => {
  * @param req express request object
  * @returns IHeaders object
  */
-export const setResponseHeaders = (requestHeaders: IncomingHttpHeaders): IHeaders => {
+export const setResponseHeaders = (requestHeaders: IncomingHttpHeaders): ISignableHeaders => {
     return {
-        "X-Request-ID": uuid.v4(),
-        "X-Correlation-ID": uuid.v4(),
-        "OCPI-From-Country-Code": requestHeaders["ocpi-to-country-code"] as string,
-        "OCPI-From-Party-Id": requestHeaders["ocpi-to-party-id"] as string,
-        "OCPI-To-Country-Code": requestHeaders["ocpi-from-country-code"] as string,
-        "OCPI-To-Party-Id": requestHeaders["ocpi-from-party-id"] as string
+        "x-correlation-id": uuid.v4(),
+        "ocpi-from-country-code": requestHeaders["ocpi-to-country-code"] as string,
+        "ocpi-from-party-id": requestHeaders["ocpi-to-party-id"] as string,
+        "ocpi-to-country-code": requestHeaders["ocpi-from-country-code"] as string,
+        "ocpi-to-party-id": requestHeaders["ocpi-from-party-id"] as string
     }
 }
 
@@ -63,7 +63,7 @@ export const formatPaginationParams = (params: any): IPaginationParams => {
 
 export const toOcpiParty = (headers: IncomingHttpHeaders): IOcpiParty => {
     return {
-        country_code: headers["ocpi-to-country-code"] as string,
-        party_id: headers["ocpi-to-party-id"] as string,
+        country_code: headers["ocpi-from-country-code"] as string,
+        party_id: headers["ocpi-from-party-id"] as string,
     }
 }

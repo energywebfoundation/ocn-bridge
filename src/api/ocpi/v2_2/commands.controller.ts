@@ -16,14 +16,15 @@
 import { Router } from "express"
 import { IncomingHttpHeaders } from "http"
 import fetch from "node-fetch"
+import uuid from "uuid"
 import { IModules } from "../../../models/bridgeConfigurationOptions"
 import { CommandResponseType, IAsyncCommand } from "../../../models/ocpi/commands"
 import { OcpiResponse } from "../../../models/ocpi/common"
 import { IPluggableAPI } from "../../../models/pluggableAPI"
 import { IPluggableDB } from "../../../models/pluggableDB"
+import { SignerService } from "../../../services/signer.service"
 import { setResponseHeaders, toOcpiParty } from "../../../tools"
 import { CustomisableController } from "../advice/customisable"
-import { SignerService } from "../../../services/signer.service"
 
 /**
  * OCPI 2.2 commands module controller
@@ -72,10 +73,12 @@ export class CommandsController extends CustomisableController {
                         req.body.reservation_id,
                         toOcpiParty(req.headers)
                     )
+                    const body = OcpiResponse.withData(response.commandResponse)
+                    body.ocn_signature = await signer?.getSignature({body})
                     // send the initial response
-                    res.send(OcpiResponse.withData(response.commandResponse))
+                    res.send(body)
                     // send the async response from the charge point
-                    await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
+                    await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB, signer)
                 } catch (err) {
                     next(err)
                 }
@@ -93,10 +96,12 @@ export class CommandsController extends CustomisableController {
                         reserveRequest,
                         toOcpiParty(req.headers)
                     )
+                    const body = OcpiResponse.withData(response.commandResponse)
+                    body.ocn_signature = await signer?.getSignature({body})
                     // send initial response
-                    res.send(OcpiResponse.withData(response.commandResponse))
+                    res.send(body)
                     // send the async response from the charge point
-                    await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
+                    await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB, signer)
                 } catch (err) {
                     next(err)
                 }
@@ -114,10 +119,12 @@ export class CommandsController extends CustomisableController {
                         startRequest,
                         toOcpiParty(req.headers)
                     )
+                    const body = OcpiResponse.withData(response.commandResponse)
+                    body.ocn_signature = await signer?.getSignature({body})
                     // send the initial response
-                    res.send(OcpiResponse.withData(response.commandResponse))
+                    res.send(body)
                     // send the async response from the charge point
-                    await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB)
+                    await this.sendAsyncResult(responseURL, req.headers, response, pluggableDB, signer)
                 } catch (err) {
                     next(err)
                 }
@@ -133,10 +140,12 @@ export class CommandsController extends CustomisableController {
                         req.body.session_id, 
                         toOcpiParty(req.headers)
                     )
+                    const body = OcpiResponse.withData(response.commandResponse)
+                    body.ocn_signature = await signer?.getSignature({body})
                     // send the inital response
-                    res.send(OcpiResponse.withData(response.commandResponse))
+                    res.send(body)
                     // send the async response from the charge point
-                    await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
+                    await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB, signer)
                 } catch (err) {
                     next(err)
                 }
@@ -154,10 +163,12 @@ export class CommandsController extends CustomisableController {
                         req.body.connector_id,
                         toOcpiParty(req.headers)
                     )
+                    const body = OcpiResponse.withData(response.commandResponse)
+                    body.ocn_signature = await signer?.getSignature({body})
                     // send the initial response
-                    res.send(OcpiResponse.withData(response.commandResponse))
+                    res.send(body)
                     // send the async response from the charge point
-                    await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB)
+                    await this.sendAsyncResult(req.body.response_url, req.headers, response, pluggableDB, signer)
                 } catch (err) {
                     next(err)
                 }
@@ -196,19 +207,24 @@ export class CommandsController extends CustomisableController {
      * @param responseURL the response_url contained in the initial command request
      * @param response the full IAsyncResult object containing CommandResponse and CommandResult
      */
-    private static async sendAsyncResult(responseURL: string, reqHeaders: IncomingHttpHeaders, response: IAsyncCommand, pluggableDB: IPluggableDB) {
+    private static async sendAsyncResult(responseURL: string, reqHeaders: IncomingHttpHeaders, response: IAsyncCommand, pluggableDB: IPluggableDB, signer?: SignerService) {
         if (this.responseWasAccepted(response) && response.commandResult) {
             // await the async response
             const asyncResult = await response.commandResult()
             // fetch token (TOKEN_C) for OCN node authorization
             const tokenC = await pluggableDB.getTokenC()
             // fire and forget request
+            const signableHeaders = setResponseHeaders(reqHeaders)
+            const signature = await signer?.getSignature({ headers: signableHeaders, body: asyncResult })
+            const headers = Object.assign({
+                "authorization": `Token ${tokenC}`,
+                "content-type": "application/json",
+                "ocn-signature": signature,
+                "x-request-id": uuid.v4()
+            }, signableHeaders)
             await fetch(responseURL, {
                 method: "POST",
-                headers: Object.assign({
-                    "Authorization": `Token ${tokenC}`,
-                    "Content-Type": "application/json",
-                }, setResponseHeaders(reqHeaders)) as { [key: string]: any },
+                headers: headers as {[key: string]: any},
                 body: JSON.stringify(asyncResult)
             })
         }
