@@ -52,7 +52,7 @@ export class TokensController extends CustomisableController {
              */
             router.post("/sender/2.2/tokens/:uid/authorize", async (req, res, next) => {
                 try {
-                    const type: ITokenType = req.query.type || "RFID"
+                    const type: ITokenType = req.query.type as ITokenType || "RFID"
                     const authorizationInfo = await pluggableAPI.tokens!.sender!.authorize(req.params.uid, type, req.body)
                     let body: OcpiResponse
                     if ((authorizationInfo as IUnauthorizedToken).unknownToken) {
