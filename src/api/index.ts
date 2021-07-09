@@ -84,6 +84,13 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
                     stripVersions(options.ocnNodeURL),
                     options.roles
                 )
+
+                if (options.permissions) {
+                    if (options.roles.length === 1) {
+                        const permissions = options.permissions.split(',').map(parseInt)
+                        await registrationService.registerService(options.roles[0], permissions)
+                    }
+                }
             }
 
             err ? reject(err) : resolve({
@@ -101,7 +108,7 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
 export const stopBridge = async (bridge: IBridge) => {
     return new Promise((resolve, reject) => {
         bridge.server.close((err?: Error) => {
-            err ? reject(err) : resolve()
+            err ? reject(err) : resolve(undefined)
         })
     })
 }

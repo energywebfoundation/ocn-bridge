@@ -14,9 +14,12 @@
     limitations under the License.
 */
 
+import { Permissions, Registry } from "@shareandcharge/ocn-registry";
 import { Role } from "@shareandcharge/ocn-registry/dist/lib/types";
 
 export interface IPluggableRegistry {
+    registry: Registry;
+    permissions: Permissions;
     getNode(countryCode: string, partyID: string): Promise<{ operator: string, url: string }>
     setParty(countryCode: string, partyID: string, roles: Role[], operator: string): Promise<boolean>
 }

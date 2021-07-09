@@ -46,4 +46,5 @@ export interface IBridgeConfigurationOptions {
     signatures?: boolean
     signer?: string
     tokenA?: string
+    permissions?: string // comma-separated string of integers
 }

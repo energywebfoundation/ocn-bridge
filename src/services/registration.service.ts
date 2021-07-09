@@ -56,6 +56,21 @@ export class RegistrationService {
         }, this.tokenA)
     }
 
+    public async registerService(role: IRole, permissionsNeeded: number[]): Promise<void> {
+        if (!this.registry?.registry || !this.registry?.permissions) {
+            throw Error('Registry object does not expose contracts')
+        }
+        const { registry, permissions } = this.registry;
+        const party = await registry.getPartyByOcpi(role.country_code, role.party_id)
+        if (!party) {
+            throw Error('Cannot set service for unregistered party')
+        }
+        const isService = await permissions.getService(party.address)
+        if (!isService) {
+            await permissions.setService(role.business_details.name, '', permissionsNeeded)
+        }
+    }
+
     public async getNodeInfo(nodeURL: string): Promise<INodeInfo> {
         const res = await fetch(url.resolve(nodeURL, "/ocn/registry/node-info"))
         return res.json()
