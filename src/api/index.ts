@@ -87,7 +87,7 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
 
                 if (options.permissions) {
                     if (options.roles.length === 1) {
-                        const permissions = options.permissions.split(',').map(parseInt)
+                        const permissions = options.permissions.split(",").map(parseInt)
                         await registrationService.registerService(options.roles[0], permissions)
                     }
                 }
