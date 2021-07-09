@@ -13,6 +13,7 @@
   "author": "eMobilify GmbH",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/bn.js": "^5.1.0",
     "@types/chai": "^4.2.14",
     "@types/express": "^4.17.11",
     "@types/mocha": "^5.2.7",
@@ -30,7 +31,7 @@
   },
   "dependencies": {
     "@shareandcharge/ocn-notary": "^1.0.0",
-    "@shareandcharge/ocn-registry": "^1.1.0",
+    "@shareandcharge/ocn-registry": "^1.2.0",
     "body-parser": "^1.19.0",
     "ethers": "^4.0.46",
     "express": "^4.17.1",

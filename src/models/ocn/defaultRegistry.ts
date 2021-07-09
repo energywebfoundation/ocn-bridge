@@ -24,8 +24,14 @@ export class DefaultRegistry implements IPluggableRegistry {
     public permissions: Permissions
 
     constructor(environment: string, private signer?: string, private spender?: string) {
-        this.registry = new Registry(environment, this.spender || this.signer)
-        this.permissions = new Permissions(environment, this.spender || this.signer)
+        if (environment === "docker") {
+            const overrides = require(`${process.cwd()}/networks.json`)
+            this.registry = new Registry("local", this.spender || this.signer, overrides)
+            this.permissions = new Permissions("local", this.spender || this.signer, overrides)
+        } else {
+            this.registry = new Registry(environment, this.spender || this.signer)
+            this.permissions = new Permissions(environment, this.spender || this.signer)
+        }
     }
 
     public async getNode(countryCode: string, partyID: string): Promise<{ operator: string; url: string; }> {
