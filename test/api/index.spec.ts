@@ -36,7 +36,7 @@ describe("API context", () => {
         const result = await fetch("http://localhost:3000")
 
         const got = await result.text()
-        const want = "OCN Bridge v2.0.0"
+        const want = "OCN Bridge v3.0.0"
 
         assert.equal(got, want)
     })
