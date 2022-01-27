@@ -77,18 +77,22 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
         const server = app.listen(options.port || 3000, async (err?: Error) => {
 
             if (!options.dryRun) {
-                const registrationService = new RegistrationService(options.pluggableDB, options.pluggableRegistry, options.tokenA)
+                if (options.ocnNodeURL) {
+                    const registrationService = new RegistrationService(options.pluggableDB, options.pluggableRegistry, options.tokenA)
 
-                await registrationService.register(
-                    options.publicBridgeURL,
-                    stripVersions(options.ocnNodeURL),
-                    options.roles
-                )
+                    await registrationService.register(
+                        options.publicBridgeURL,
+                        stripVersions(options.ocnNodeURL),
+                        options.roles
+                    )
 
-                if (options.permissions) {
-                    if (options.roles.length === 1) {
-                        await registrationService.registerService(options.roles[0], options.permissions)
+                    if (options.permissions) {
+                        if (options.roles.length === 1) {
+                            await registrationService.registerService(options.roles[0], options.permissions)
+                        }
                     }
+                } else {
+                    throw Error('Cannot register without "ocnNodeURL" and "roles"')
                 }
             }
 

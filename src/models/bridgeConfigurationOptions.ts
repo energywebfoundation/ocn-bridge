@@ -34,7 +34,7 @@ export interface IModules {
 
 export interface IBridgeConfigurationOptions {
     publicBridgeURL: string
-    ocnNodeURL: string
+    ocnNodeURL?: string
     roles: IRole[]
     modules: IModules
     pluggableAPI: IPluggableAPI

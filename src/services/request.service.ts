@@ -43,7 +43,7 @@ export class RequestService {
 
     /**
      * Send a request to obtain location data (i.e. GET sender interface)
-     * @param recipient party the request should be sent to 
+     * @param recipient party the request should be sent to
      */
     public async getLocations(recipient: IOcpiParty): Promise<IOcpiResponse<ILocation[]>> {
         const endpoint = await this.db.getEndpoint("locations", "SENDER")
@@ -54,7 +54,7 @@ export class RequestService {
 
     /**
      * Send a request to obtain token data (i.e. GET sender interface)
-     * @param recipient party the request should be sent to 
+     * @param recipient party the request should be sent to
      */
     public async getTokens(recipient: IOcpiParty): Promise<IOcpiResponse<IToken[]>> {
         const endpoint = await this.db.getEndpoint("tokens", "SENDER")
@@ -114,7 +114,7 @@ export class RequestService {
         if (!this.signer) {
             return headers
         }
-        
+
         const signable = {
             "x-correlation-id": correlationId,
             "ocpi-from-country-code": this.from.country_code,
@@ -122,9 +122,9 @@ export class RequestService {
             "ocpi-to-country-code": recipient.country_code,
             "ocpi-to-party-id": recipient.party_id
         }
-        
+
         const signature = { "OCN-Signature": await this.signer.getSignature({ headers: signable, body }) }
-        
+
         return Object.assign(signature, headers)
     }
 }
