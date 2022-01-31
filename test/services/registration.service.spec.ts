@@ -1,5 +1,6 @@
 import { assert } from "chai"
 import { EventEmitter } from "events"
+import { IRole } from "../../src/models"
 import { IPluggableRegistry } from "../../src/models/ocn/pluggableRegistry"
 import { registryListing } from "../../src/models/ocn/registry"
 import { IPluggableDB } from "../../src/models/pluggableDB"
@@ -21,12 +22,22 @@ describe("Registration Service", () => {
     let db: IPluggableDB
     let registrationService: RegistrationService
 
+    const baseUrl = 'http://localhost:3000'
+    const roles: IRole[] = [{
+        country_code: 'DE',
+        party_id: 'MSP',
+        role: 'EMSP',
+        business_details: {
+            name: 'Test EMSP'
+        }
+    }]
+
     beforeEach(() => {
         registry = new PluggableRegistryStub()
         db = new PluggableDBStub()
         db.setTokenB("token-b")
         db.setTokenC("token-c")
-        registrationService = new RegistrationService(db, registry, "token-a")
+        registrationService = new RegistrationService(db, registry, baseUrl, roles)
     })
 
     it("getNodeInfo", async () => {
@@ -71,7 +82,7 @@ describe("Registration Service", () => {
         for (const test of testCases) {
 
             it(test.name, async () => {
-                const modifiedRegistrationService = new RegistrationService(db, test.registry, "token-a")
+                const modifiedRegistrationService = new RegistrationService(db, test.registry, baseUrl, roles)
                 const got = await modifiedRegistrationService.isListedInRegistry("DE", "MSP", {
                     url: "http://localhost:3001",
                     address: "0x63937aBd9308ad672Df9A2a1dcb1b38961f29C11"
@@ -95,7 +106,7 @@ describe("Registration Service", () => {
         })
         modifiedDB.setTokenC("token-c")
 
-        const modifiedRegistrationService = new RegistrationService(modifiedDB, registry, "token-a")
+        const modifiedRegistrationService = new RegistrationService(modifiedDB, registry, baseUrl, roles)
 
         const ocnNode = await startNode(3001)
 
@@ -126,7 +137,7 @@ describe("Registration Service", () => {
             }]
         })
 
-        const modifiedRegistrationService = new RegistrationService(modifiedDB, registry, "token-a")
+        const modifiedRegistrationService = new RegistrationService(modifiedDB, registry, baseUrl, roles)
 
         const events = new EventEmitter()
 

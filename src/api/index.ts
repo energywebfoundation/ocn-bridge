@@ -18,7 +18,6 @@ import express, { Router } from "express"
 import morgan from "morgan"
 import { IBridge, IBridgeConfigurationOptions } from "../models"
 import { RegistrationService, RequestService, SignerService } from "../services"
-import { stripVersions } from "../tools"
 import { hasValidSignature, isAuthorized, handleOcpiErrors } from "./ocpi/middleware/middleware"
 // import controllers
 import { CdrsController } from "./ocpi/v2_2/cdrs.controller"
@@ -76,29 +75,38 @@ export const startBridge = async (options: IBridgeConfigurationOptions): Promise
     return new Promise(async (resolve, reject) => {
         const server = app.listen(options.port || 3000, async (err?: Error) => {
 
-            if (!options.dryRun) {
-                if (options.ocnNodeURL) {
-                    const registrationService = new RegistrationService(options.pluggableDB, options.pluggableRegistry, options.tokenA)
+            // if (!options.dryRun) {
+            //     if (options.ocnNodeURL) {
+            //         const registrationService = new RegistrationService(options.pluggableDB, options.pluggableRegistry, options.tokenA)
 
-                    await registrationService.register(
-                        options.publicBridgeURL,
-                        stripVersions(options.ocnNodeURL),
-                        options.roles
-                    )
+            //         await registrationService.register(
+            //             options.publicBridgeURL,
+            //             stripVersions(options.ocnNodeURL),
+            //             options.roles
+            //         )
 
-                    if (options.permissions) {
-                        if (options.roles.length === 1) {
-                            await registrationService.registerService(options.roles[0], options.permissions)
-                        }
-                    }
-                } else {
-                    throw Error('Cannot register without "ocnNodeURL" and "roles"')
-                }
-            }
+            //         if (options.permissions) {
+            //             if (options.roles.length === 1) {
+            //                 await registrationService.registerService(options.roles[0], options.permissions)
+            //             }
+            //         }
+            //     } else {
+            //         throw Error('Cannot register without "ocnNodeURL" and "roles"')
+            //     }
+            // }
 
             err ? reject(err) : resolve({
                 server,
-                requests: new RequestService(options.pluggableDB, options.roles[0], signerService)
+                requests: new RequestService(
+                    options.pluggableDB,
+                    options.roles[0],
+                    signerService),
+                registry: new RegistrationService(
+                    options.pluggableDB,
+                    options.pluggableRegistry,
+                    options.publicBridgeURL,
+                    options.roles
+                )
             })
         })
     })

@@ -34,7 +34,6 @@ describe("OCPI Tokens Controller", () => {
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: db,
             pluggableRegistry: new PluggableRegistryStub(),
-            dryRun: true
         })
 
         ocnNode = await startNode(3001)

@@ -17,7 +17,7 @@
 import { Role } from "@shareandcharge/ocn-registry/dist/lib/types";
 import { utils } from "ethers";
 import fetch from "node-fetch";
-import * as url from "url";
+import { URL } from "url";
 import * as uuid from "uuid";
 import { IPluggableRegistry } from "../models/ocn/pluggableRegistry";
 import { INodeInfo, registryListing } from "../models/ocn/registry";
@@ -27,17 +27,18 @@ import { IVersionDetail, IVersions } from "../models/ocpi/versions";
 import { IPluggableDB } from "../models/pluggableDB";
 
 export class RegistrationService {
+    constructor(
+        private db: IPluggableDB,
+        private registry: IPluggableRegistry,
+        private baseUrl: string,
+        private roles: IRole[],
+    ) {}
 
-    constructor(private db: IPluggableDB, private registry?: IPluggableRegistry, private tokenA?: string) {}
-
-    public async register(publicIP: string, nodeURL: string, roles: IRole[]): Promise<void> {
+    public async register(nodeURL: string, tokenA: string): Promise<void> {
         const nodeInfo = await this.getNodeInfo(nodeURL)
-        for (const role of roles) {
+        for (const role of this.roles) {
             const listing = await this.isListedInRegistry(role.country_code, role.party_id, nodeInfo)
             if (listing !== registryListing.OK) {
-                if (!this.registry) {
-                    throw Error("Need pluggableRegistry option to set party details in OCN Registry.")
-                }
                 await this.registry.setParty(role.country_code, role.party_id, [this.toRole(role.role)], nodeInfo.address)
             }
         }
@@ -45,15 +46,12 @@ export class RegistrationService {
         if (isConnected) {
             return
         }
-        if (!this.tokenA) {
-            throw Error("Need tokenA option to complete registration process with OCN Node.")
-        }
-        await this.getNodeEndpoints(url.resolve(nodeURL, "/ocpi/versions"), this.tokenA)
+        await this.getNodeEndpoints(new URL("/ocpi/versions", nodeURL).href, tokenA)
         await this.connectToNode({
             token: uuid.v4(),
-            url: url.resolve(publicIP, "/ocpi/versions"),
-            roles
-        }, this.tokenA)
+            url: new URL("/ocpi/versions", this.baseUrl).href,
+            roles: this.roles,
+        }, tokenA)
     }
 
     public async registerService(role: IRole, permissionsNeeded: number[]): Promise<void> {
@@ -72,7 +70,7 @@ export class RegistrationService {
     }
 
     public async getNodeInfo(nodeURL: string): Promise<INodeInfo> {
-        const res = await fetch(url.resolve(nodeURL, "/ocn/registry/node-info"))
+        const res = await fetch(new URL("/ocn/registry/node-info", nodeURL).href)
         return res.json()
     }
 

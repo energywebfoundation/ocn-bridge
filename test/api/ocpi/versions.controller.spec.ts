@@ -25,7 +25,6 @@ describe("OCPI Versions Controller", () => {
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: db,
             pluggableRegistry: new PluggableRegistryStub(),
-            dryRun: true
         })
     })
 

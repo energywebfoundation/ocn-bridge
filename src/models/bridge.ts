@@ -1,7 +1,8 @@
 import { Server } from "http";
-import { RequestService } from "../services";
+import { RegistrationService, RequestService } from "../services";
 
 export interface IBridge {
     server: Server,
-    requests: RequestService
+    requests: RequestService,
+    registry: RegistrationService,
 }

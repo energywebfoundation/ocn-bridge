@@ -24,7 +24,6 @@ describe("API context", () => {
             pluggableAPI: new PluggableAPIStub(),
             pluggableDB: new PluggableDBStub(),
             pluggableRegistry: new PluggableRegistryStub(),
-            dryRun: true
         })
     })
 
