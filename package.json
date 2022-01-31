@@ -1,6 +1,6 @@
 {
   "name": "@energyweb/ocn-bridge",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "CPO Bridge for the Open Charging Network configurable for any proprietary API",
   "repository": "bitbucket:shareandcharge/ocn-bridge",
   "main": "dist/index.js",
