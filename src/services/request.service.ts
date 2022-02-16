@@ -17,6 +17,7 @@ import fetch from "node-fetch";
 import * as uuid from "uuid";
 import { IChargeDetailRecord } from "../models/ocpi/cdrs";
 import { ISession } from "../models/ocpi/sessions";
+import { IStartSession } from "../models/pluggableAPI"
 import { IPluggableDB } from "../models/pluggableDB";
 import { SignerService } from "./signer.service";
 import { ILocation, IToken } from "../models";
@@ -39,7 +40,7 @@ export interface IOcpiResponse<T> {
  */
 export class RequestService {
 
-    constructor(private db: IPluggableDB, private from: IOcpiParty, private signer?: SignerService) {}
+    constructor(private db: IPluggableDB, private from: IOcpiParty, private signer?: SignerService) { }
 
     /**
      * Send a request to obtain location data (i.e. GET sender interface)
@@ -95,9 +96,25 @@ export class RequestService {
         return response.json()
     }
 
-    private async getHeaders(recipient: IOcpiParty, body?: any): Promise<{[key: string]: string}> {
+    /**
+    * Start charging session 
+    * @param headers incoming request headers used for response routing
+    */
+    public async startSession(recipient: IOcpiParty, startRequest: IStartSession): Promise<IOcpiResponse<undefined>> {
+        const url = await this.db.getEndpoint("commands", "RECEIVER")
+        const headers = await this.getHeaders(recipient)
+        //HOW DOES IT KNOW WHICH ROUTE TO SELECT?
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(startRequest)
+        })
+        return response.json()
+    }
+
+    private async getHeaders(recipient: IOcpiParty, body?: any): Promise<{ [key: string]: string }> {
         const correlationId = uuid.v4()
-        const headers: {[key: string]: string} = {
+        const headers: { [key: string]: string } = {
             "Authorization": await this.db.getTokenC(),
             "X-Request-ID": uuid.v4(),
             "X-Correlation-ID": correlationId,

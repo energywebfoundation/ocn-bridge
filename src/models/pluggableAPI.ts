@@ -36,6 +36,7 @@ export interface IStartSession {
     location_id: string
     evse_uid?: string
     connector_id?: string
+    response_url: string
 }
 
 export interface IPaginationResponse<T> {

@@ -13,6 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
+import { IToken } from ".";
 import { ITokenType } from "./tokens";
 
 export interface ISession {
@@ -34,6 +35,16 @@ export interface ISession {
     total_cost?: IPrice
     status: sessionStatus
     last_updated: string
+}
+
+export interface IStartSession {
+    response_url: string
+    token: IToken
+    location_id: string
+    evse_uid?: string
+    connector_id?: string
+    authorization_reference?: string
+
 }
 
 export type sessionStatus = "ACTIVE" | "COMPLETED" | "INVALID" | "PENDING" | "RESERVATION"
