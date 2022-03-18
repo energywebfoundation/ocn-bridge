@@ -122,9 +122,11 @@ export class RequestService {
             "ocpi-to-country-code": recipient.country_code,
             "ocpi-to-party-id": recipient.party_id
         }
+        const signature = await this.signer.getSignature({ headers: signable, body });
+        // const signature = { "OCN-Signature": await this.signer.getSignature({ headers: signable, body }) }
 
-        const signature = { "OCN-Signature": await this.signer.getSignature({ headers: signable, body }) }
-
-        return Object.assign(signature, headers)
+        return {...headers, ...(signature && {
+            "OCN-Signature": signature
+        })}
     }
 }
