@@ -209,19 +209,24 @@ export class CommandsController extends CustomisableController {
      */
     private static async sendAsyncResult(responseURL: string, reqHeaders: IncomingHttpHeaders, response: IAsyncCommand, pluggableDB: IPluggableDB, signer?: SignerService) {
         if (this.responseWasAccepted(response) && response.commandResult) {
+            console.log("in updated command")
             // await the async response
             const asyncResult = await response.commandResult()
             // fetch token (TOKEN_C) for OCN node authorization
             const tokenC = await pluggableDB.getTokenC()
             // fire and forget request
             const signableHeaders = setResponseHeaders(reqHeaders)
-            const signature = await signer?.getSignature({ headers: signableHeaders, body: asyncResult })
-            const headers = Object.assign({
+            const signature = await signer?.getSignature({ headers: signableHeaders, body: asyncResult });
+            console.log(signature, "The signature")
+            const baseHeaders = Object.assign({
                 "authorization": `Token ${tokenC}`,
                 "content-type": "application/json",
-                "ocn-signature": signature,
                 "x-request-id": uuid.v4()
             }, signableHeaders)
+            const headers = {
+                ...baseHeaders,
+                ...(signature && {"ocn-signature": signature})
+            }
             await fetch(responseURL, {
                 method: "POST",
                 headers: headers as {[key: string]: any},
