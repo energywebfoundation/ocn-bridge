@@ -46,7 +46,6 @@ export class SessionsController extends CustomisableController {
             })
 
         }
-
         if (this.isIncluded("sessions", "SENDER", modules, pluggableAPI)) {
             /**
              * GET cdrs list

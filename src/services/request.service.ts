@@ -17,6 +17,7 @@ import fetch from "node-fetch";
 import * as uuid from "uuid";
 import { IChargeDetailRecord } from "../models/ocpi/cdrs";
 import { ISession } from "../models/ocpi/sessions";
+import {IStartSession, IStopSession} from "../models/pluggableAPI"
 import { IPluggableDB } from "../models/pluggableDB";
 import { SignerService } from "./signer.service";
 import { ILocation, IToken } from "../models";
@@ -80,6 +81,61 @@ export class RequestService {
         return response.json()
     }
 
+	/**
+     * Start charging session 
+     * @param headers incoming request headers used for response routing
+     */
+     public async startSession(recipient: IOcpiParty, startRequest: IStartSession): Promise<IOcpiResponse<undefined>> {
+         console.log("NEWER LOG TO LOOK FOR")
+        const endpoint = await this.db.getEndpoint("commands", "RECEIVER")
+        const path = "/START_SESSION"
+        const url = endpoint + path
+        console.log(url, "THE URL IN BRIDGE START SESSION")
+        const headers = await this.getHeaders(recipient, startRequest)
+        console.log(JSON.stringify(headers), "THE HEADERS")
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(startRequest)
+        })
+        return response.json()
+    }
+
+    	/**
+     * Start charging session 
+     * @param headers incoming request headers used for response routing
+     */
+         public async stopSession(recipient: IOcpiParty, stopRequest: IStopSession): Promise<IOcpiResponse<undefined>> {
+            const endpoint = await this.db.getEndpoint("commands", "RECEIVER")
+            const path = "/STOP_SESSION"
+            const url = endpoint + path
+            console.log(url, "THE URL IN BRIDGE STOP SESSION")
+            const headers = await this.getHeaders(recipient, stopRequest)
+            const response = await fetch(url, {
+                method: "POST",
+                headers,
+                body: JSON.stringify(stopRequest)
+            })
+            return response.json()
+        }
+
+    /**
+     * Send session data (i.e. PUT receiver interface)
+     * @param headers incoming request headers used for response routing
+     */
+	public async getSessionInfo(recipient: IOcpiParty, startDate: Date, endDate: Date): Promise<IOcpiResponse<undefined>> {
+	    const endpoint = await this.db.getEndpoint("sessions", "SENDER")
+		const path = `/?date_from=${startDate}&endDate=${endDate}`
+		const url = endpoint + path
+		console.log(url, "THE URL IN OCN BRIDGE")
+		const headers = await this.getHeaders(recipient)
+		const response = await fetch(url, { headers })
+		return response.json()
+	}
+
+    //implement send locations
+    //asl for locations receiver 
+
     /**
      * Sends a charge detail record for a particular session (i.e. POST receiver interface)
      * @param headers incoming request headers used for response routing
@@ -96,6 +152,7 @@ export class RequestService {
     }
 
     private async getHeaders(recipient: IOcpiParty, body?: any): Promise<{[key: string]: string}> {
+        console.log("IN GET HEADERS")
         const correlationId = uuid.v4()
         const headers: {[key: string]: string} = {
             "Authorization": await this.db.getTokenC(),
@@ -112,6 +169,7 @@ export class RequestService {
         }
 
         if (!this.signer) {
+            console.log("IN GET HEADERS< NO SIGNER")
             return headers
         }
 
@@ -122,9 +180,11 @@ export class RequestService {
             "ocpi-to-country-code": recipient.country_code,
             "ocpi-to-party-id": recipient.party_id
         }
-
+        console.log(signable, "THE SIGNABLE")
+        console.log(body, "THE BODY")
         const signature = { "OCN-Signature": await this.signer.getSignature({ headers: signable, body }) }
-
+        console.log(signature, "SIGNATURES IN OCN BRIDGE")
+        console.log(headers, "HEADERS IN OCN BRIDGE")
         return Object.assign(signature, headers)
     }
 }

@@ -33,9 +33,16 @@ export interface IReserveNow {
 
 export interface IStartSession {
     token: IToken
+    response_url: string;
     location_id: string
     evse_uid?: string
     connector_id?: string
+}
+
+
+export interface IStopSession {
+    response_url: string;
+    session_id: string
 }
 
 export interface IPaginationResponse<T> {
@@ -43,6 +50,7 @@ export interface IPaginationResponse<T> {
     data: T
 }
 
+//add receiver to this api for locations. Then have receiver object. Then implement getLocation or getObject
 export interface IPluggableAPI {
     commands?: {
         sender?: {
