@@ -221,7 +221,8 @@ export class CommandsController extends CustomisableController {
             const baseHeaders = Object.assign({
                 "authorization": `Token ${tokenC}`,
                 "content-type": "application/json",
-                "x-request-id": uuid.v4()
+                "x-request-id": uuid.v4(),
+                "test": "test1"
             }, signableHeaders)
             const headers = {
                 ...baseHeaders,

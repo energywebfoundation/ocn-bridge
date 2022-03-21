@@ -104,7 +104,8 @@ export class RequestService {
             "OCPI-From-Country-Code": this.from.country_code,
             "OCPI-From-Party-Id": this.from.party_id,
             "OCPI-To-Country-Code": recipient.country_code,
-            "OCPI-To-Party-Id": recipient.party_id
+            "OCPI-To-Party-Id": recipient.party_id,
+            "TEST": "test"
         }
 
         if (body) {
