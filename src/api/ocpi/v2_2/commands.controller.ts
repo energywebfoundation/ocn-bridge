@@ -217,6 +217,7 @@ export class CommandsController extends CustomisableController {
             // fire and forget request
             const signableHeaders = setResponseHeaders(reqHeaders)
             const signature = await signer?.getSignature({ headers: signableHeaders, body: asyncResult });
+            const isValidSignature = signature && signature !== "undefined" && signature !== undefined;
             console.log(signature, "The signature")
             const baseHeaders = Object.assign({
                 "authorization": `Token ${tokenC}`,
@@ -226,7 +227,7 @@ export class CommandsController extends CustomisableController {
             }, signableHeaders)
             const headers = {
                 ...baseHeaders,
-                ...(signature && {"ocn-signature": signature})
+                ...(isValidSignature &&  {"ocn-signature": signature})
             }
             await fetch(responseURL, {
                 method: "POST",
