@@ -87,6 +87,9 @@ export class PluggableAPIStub implements IPluggableAPI {
         receiver: {
             async update(): Promise<void> {
                 return
+            },
+            async patch(): Promise<void> {
+                return
             }
         },
         sender: {

@@ -72,6 +72,7 @@ export interface IPluggableAPI {
     sessions?: {
         receiver?: {
             update(session: ISession): Promise<void>
+            patch(session: Partial<ISession>): Promise<void>
         }
         sender?: {
             getList(pagination?: IPaginationParams): Promise<IPaginationResponse<ISession[]>>
