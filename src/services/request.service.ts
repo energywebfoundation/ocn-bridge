@@ -115,19 +115,6 @@ export class RequestService {
             return response.json()
         }
 
-    /**
-     * Send session data (i.e. PUT receiver interface)
-     * @param headers incoming request headers used for response routing
-     */
-	public async getSessionInfo(recipient: IOcpiParty, startDate: Date, endDate: Date): Promise<IOcpiResponse<undefined>> {
-	    const endpoint = await this.db.getEndpoint("sessions", "SENDER")
-		const path = `/?date_from=${startDate}&endDate=${endDate}`
-		const url = endpoint + path
-		const headers = await this.getHeaders(recipient)
-		const response = await fetch(url, { headers })
-		return response.json()
-	}
-
     //implement send locations
     //asl for locations receiver 
 
