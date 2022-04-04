@@ -37,7 +37,6 @@ export class SignerService {
         try {
             const notary = new Notary()
             await notary.sign({headers, params, body}, this.signer!)
-
             return notary.serialize()
         } catch (err) {
             return err.message

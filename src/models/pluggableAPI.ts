@@ -49,7 +49,6 @@ export interface IPaginationResponse<T> {
     data: T
 }
 
-// add receiver to this api for locations. Then have receiver object. Then implement getLocation or getObject
 export interface IPluggableAPI {
     commands?: {
         sender?: {

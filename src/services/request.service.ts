@@ -99,7 +99,7 @@ export class RequestService {
     }
 
     /**
-     * Start charging session 
+     * Stop charging session 
      * @param headers incoming request headers used for response routing
      */
          public async stopSession(recipient: IOcpiParty, stopRequest: IStopSession): Promise<IOcpiResponse<undefined>> {
