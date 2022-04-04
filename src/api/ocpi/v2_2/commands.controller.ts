@@ -111,7 +111,6 @@ export class CommandsController extends CustomisableController {
              * OCPI command: START_SESSION
              */
             router.post("/receiver/2.2/commands/START_SESSION", async (req, res, next) => {
-                console.log("IN RECEIVER POST!!")
                 try {
                     // separate response_url from rest of body
                     const { responseURL, out: startRequest } = this.extractResponseURL(req.body)
@@ -122,7 +121,6 @@ export class CommandsController extends CustomisableController {
                     )
                     const body = OcpiResponse.withData(response.commandResponse)
                     body.ocn_signature = await signer?.getSignature({body})
-                    console.log(body.ocn_signature, "THE SIGNATURE NOW!!!!!!!")
                     // send the initial response
                     res.send(body)
                     // send the async response from the charge point
@@ -210,7 +208,6 @@ export class CommandsController extends CustomisableController {
      * @param response the full IAsyncResult object containing CommandResponse and CommandResult
      */
     private static async sendAsyncResult(responseURL: string, reqHeaders: IncomingHttpHeaders, response: IAsyncCommand, pluggableDB: IPluggableDB, signer?: SignerService) {
-        console.log("IN SEND ASYNC RESULT")
         if (this.responseWasAccepted(response) && response.commandResult) {
             // await the async response
             const asyncResult = await response.commandResult()
@@ -219,7 +216,6 @@ export class CommandsController extends CustomisableController {
             // fire and forget request
             const signableHeaders = setResponseHeaders(reqHeaders)
             const signature = await signer?.getSignature({ headers: signableHeaders, body: asyncResult })
-            console.log(signature, "THE SIGNATURE")
             const baseHeaders = Object.assign({
                 "authorization": `Token ${tokenC}`,
                 "content-type": "application/json",
@@ -229,10 +225,6 @@ export class CommandsController extends CustomisableController {
                 ...baseHeaders,
                 ...(signature && {"ocn-signature": signature})
             }
-            if (signature) {
-                console.log(true, "THE VALUE IS TRUTHY")
-            }
-            console.log("what it would bd stringified", headers as {[key: string]: any})
             await fetch(responseURL, {
                 method: "POST",
                 headers: headers as {[key: string]: any},
