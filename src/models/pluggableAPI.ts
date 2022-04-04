@@ -39,7 +39,6 @@ export interface IStartSession {
     connector_id?: string
 }
 
-
 export interface IStopSession {
     response_url: string;
     session_id: string
@@ -50,7 +49,7 @@ export interface IPaginationResponse<T> {
     data: T
 }
 
-//add receiver to this api for locations. Then have receiver object. Then implement getLocation or getObject
+// add receiver to this api for locations. Then have receiver object. Then implement getLocation or getObject
 export interface IPluggableAPI {
     commands?: {
         sender?: {

@@ -81,11 +81,11 @@ export class RequestService {
         return response.json()
     }
 
-	/**
+    /**
      * Start charging session 
      * @param headers incoming request headers used for response routing
      */
-     public async startSession(recipient: IOcpiParty, startRequest: IStartSession): Promise<IOcpiResponse<undefined>> {
+    public async startSession(recipient: IOcpiParty, startRequest: IStartSession): Promise<IOcpiResponse<undefined>> {
         const endpoint = await this.db.getEndpoint("commands", "RECEIVER")
         const path = "/START_SESSION"
         const url = endpoint + path
@@ -98,7 +98,7 @@ export class RequestService {
         return response.json()
     }
 
-    	/**
+    /**
      * Start charging session 
      * @param headers incoming request headers used for response routing
      */
@@ -114,9 +114,6 @@ export class RequestService {
             })
             return response.json()
         }
-
-    //implement send locations
-    //asl for locations receiver 
 
     /**
      * Sends a charge detail record for a particular session (i.e. POST receiver interface)

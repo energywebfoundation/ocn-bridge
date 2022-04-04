@@ -45,19 +45,19 @@ export class SessionsController extends CustomisableController {
                 }
             })
 
-                        /**
+            /**
              * PATCH session
              */
-                         router.put("/receiver/2.2/sessions/:country_code/:party_id/:session_id", async (req, res, next) => {
-                            try {
-                                pluggableAPI.sessions!.receiver!.patch(req.body)
-                                const body = OcpiResponse.basicSuccess()
-                                body.ocn_signature = await signer?.getSignature({ body })
-                                res.send(body)
-                            } catch (err) {
-                                next(err)
-                            }
-                        })
+            router.put("/receiver/2.2/sessions/:country_code/:party_id/:session_id", async (req, res, next) => {
+                try {
+                    pluggableAPI.sessions!.receiver!.patch(req.body)
+                    const body = OcpiResponse.basicSuccess()
+                    body.ocn_signature = await signer?.getSignature({ body })
+                    res.send(body)
+                } catch (err) {
+                    next(err)
+                }
+            })
 
         }
         if (this.isIncluded("sessions", "SENDER", modules, pluggableAPI)) {
