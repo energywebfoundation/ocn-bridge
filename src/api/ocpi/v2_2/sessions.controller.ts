@@ -50,7 +50,7 @@ export class SessionsController extends CustomisableController {
              */
             router.patch("/receiver/2.2/sessions/:country_code/:party_id/:session_id", async (req, res, next) => {
                 try {
-                    pluggableAPI.sessions!.receiver!.patch(req.body, req.params.session_id)
+                    pluggableAPI.sessions!.receiver!.patch(req.body, req.params.session_id, req.params.country_code, req.params.party_id)
                     const body = OcpiResponse.basicSuccess()
                     body.ocn_signature = await signer?.getSignature({ body })
                     res.send(body)
