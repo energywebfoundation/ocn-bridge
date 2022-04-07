@@ -102,18 +102,18 @@ export class RequestService {
      * Stop charging session 
      * @param headers incoming request headers used for response routing
      */
-         public async stopSession(recipient: IOcpiParty, stopRequest: IStopSession): Promise<IOcpiResponse<undefined>> {
-            const endpoint = await this.db.getEndpoint("commands", "RECEIVER")
-            const path = "/STOP_SESSION"
-            const url = endpoint + path
-            const headers = await this.getHeaders(recipient, stopRequest)
-            const response = await fetch(url, {
-                method: "POST",
-                headers,
-                body: JSON.stringify(stopRequest)
-            })
-            return response.json()
-        }
+    public async stopSession(recipient: IOcpiParty, stopRequest: IStopSession): Promise<IOcpiResponse<undefined>> {
+        const endpoint = await this.db.getEndpoint("commands", "RECEIVER")
+        const path = "/STOP_SESSION"
+        const url = endpoint + path
+        const headers = await this.getHeaders(recipient, stopRequest)
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(stopRequest)
+        })
+        return response.json()
+    }
 
     /**
      * Sends a charge detail record for a particular session (i.e. POST receiver interface)
